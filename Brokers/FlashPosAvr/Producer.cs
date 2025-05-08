@@ -39,6 +39,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _semaphoreSlim = new SemaphoreSlim(1);
 
             _mqttClient = mock;
+            _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
         }
 
 
