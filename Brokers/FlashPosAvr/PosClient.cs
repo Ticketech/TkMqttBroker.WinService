@@ -30,13 +30,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             try
             {
-                using (var client = new HttpClient())
+                using (var client = GetClient())
                 {
-                    client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
-                    client.DefaultRequestHeaders.Add("Accept", "application/json");
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    client.Timeout = new TimeSpan(0, 1, 0);
-
                     string ApiCall = _serviceUrl + $"/api/v2/UltraApi/Locations/{_locationId}/Stays/AVR";
                     var request = new StringContent(JsonConvert.SerializeObject(avrData), Encoding.UTF8, "application/json");
 
@@ -63,7 +58,25 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             return res;
         }
 
+        private HttpClient GetClient()
+        {
+            var handler = new HttpClientHandler();
 
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ServerCertificateCustomValidationCallback =
+                (httpRequestMessage, cert, cetChain, policyErrors) =>
+                {
+                    return true;
+                };
 
+            var client = new HttpClient(handler);
+
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.Timeout = new TimeSpan(0, 1, 0);
+
+            return client
+        }
     }
 }
