@@ -8,6 +8,7 @@ using TkMqttBroker.WinService.Brokers.FlashPosAvr;
 
 namespace TkMqttBroker.WinService
 {
+    //gmz.next. created.
     static class Program
     {
         /// <summary>

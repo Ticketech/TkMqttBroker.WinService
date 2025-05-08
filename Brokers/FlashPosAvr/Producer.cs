@@ -1,27 +1,114 @@
-﻿using System;
+﻿using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Options;
+using MQTTnet.Client.Receiving;
+using MQTTnet.Client.Subscribing;
+using System;
+using System.Collections.Generic;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    internal class FlashAvrProducer
+    //credits: https://docs.google.com/document/d/1meiNhvV4Ooz-nrf5kF48nSXbK1YwT85rgXonwDnlf5o/edit?tab=t.0
+
+
+    public class FlashAvrProducer
     {
-        private FlashAvrProducerConfiguration camera;
+        private FlashAvrProducerConfiguration _cameraConfiguration;
+        private readonly FlashPosAvrRepository _repo;
+        private readonly FlashPosAvrMapper _mapper;
+        private readonly PosClient _pos;
+        private IMqttClient _mqttClient;
 
-        public FlashAvrProducer(FlashAvrProducerConfiguration camera)
+
+        public FlashAvrProducer(FlashAvrProducerConfiguration configuration)
         {
-            this.camera = camera;
+            this._cameraConfiguration = configuration;
+            _repo = new FlashPosAvrRepository();
+            _mapper = new FlashPosAvrMapper();
+            _pos = new PosClient();
         }
 
-        internal void Start()
+
+        public void Start()
         {
-            throw new NotImplementedException();
+            //create client
+            CreateProducer();
         }
+
+
+        private async void CreateProducer()
+        {
+            // Create a MQTT client factory
+            var factory = new MqttFactory();
+
+            // Create a MQTT client instance
+            _mqttClient = factory.CreateMqttClient();
+
+            // Create MQTT client options
+            var options = new MqttClientOptionsBuilder()
+                .WithTcpServer(_cameraConfiguration.Broker, _cameraConfiguration.Port) // MQTT broker address and port
+                .WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
+                .WithClientId(_cameraConfiguration.ClientId)
+                .WithCleanSession()
+                .WithTls(
+                    o =>
+                    {
+                        // The used public broker sometimes has invalid certificates. This sample accepts all
+                        // certificates. This should not be used in live environments.
+                        o.CertificateValidationHandler = _ => true;
+
+                        // The default value is determined by the OS. Set manually to force version.
+                        o.SslProtocol = SslProtocols.Tls12; ;
+
+                        // Please provide the file path of your certificate file. The current directory is /bin.
+                        var certificate = new X509Certificate("/opt/emqxsl-ca.crt", "");
+                        o.Certificates = new List<X509Certificate> { certificate };
+                    }
+                )
+                .Build();
+
+            //connect
+            var connectResult = await _mqttClient.ConnectAsync(options);
+
+            //subscribe
+            if (connectResult.ResultCode == MqttClientConnectResultCode.Success)
+            {
+                Console.WriteLine("Connected to MQTT broker successfully.");
+
+                // Subscribe to a topic
+                await _mqttClient.SubscribeAsync(_cameraConfiguration.Topic);
+
+                // Callback function when a message is received
+                _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
+            }
+
+        }
+
+
+        //produce data for pos avr
+        private async Task OnUseApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs data)
+        {
+            //// Convertir el payload a una cadena legible
+            //var messagePayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
+
+            CheckInRequest avrData = _mapper.PosAvrData(data);
+            await _repo.Save(avrData);
+
+            await _pos.CheckInOutAVR(avrData);
+        }
+
+
     }
 
 
 
-    internal class FlashAvrProducerConfiguration
-    {
-    }
 
 
 
