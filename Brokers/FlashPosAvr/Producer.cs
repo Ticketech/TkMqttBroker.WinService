@@ -27,6 +27,21 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private IMqttClient _mqttClient;
         private readonly SemaphoreSlim _semaphoreSlim;
 
+
+        //for testing
+        public FlashAvrProducer(FlashAvrProducerConfiguration configuration, IMqttClient mock)
+        {
+            _cameraConfiguration = configuration;
+            _repo = new FlashPosAvrRepository();
+            _mapper = new FlashPosAvrMapper();
+            _pos = new PosClient();
+
+            _semaphoreSlim = new SemaphoreSlim(1);
+
+            _mqttClient = mock;
+        }
+
+
         public FlashAvrProducer(FlashAvrProducerConfiguration configuration)
         {
             _cameraConfiguration = configuration;
@@ -41,7 +56,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public async Task Start()
         {
             //create client
-            await CreateProducer();
+            if (_mqttClient != null)
+                await CreateProducer();
         }
 
 
