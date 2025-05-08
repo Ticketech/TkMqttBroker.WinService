@@ -5,6 +5,8 @@ using Tk.Services.REST.Models.Stays;
 using Newtonsoft.Json;
 using System.Data;
 using System.Configuration;
+using Tk.NetTiers.DataAccessLayer;
+using Tk.NetTiers;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
@@ -12,7 +14,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         private readonly string _dataType; //table syncqueues
         private readonly string _softwareVersion;
-        private readonly SqlConnection _sqlConnection;
 
 
         public FlashPosAvrRepository()
@@ -21,57 +22,45 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 typeof(FlashPosAvrService)).GetName().Version.ToString();
 
             _dataType = "FlashPosAvrBroker";
-
-            _sqlConnection = new SqlConnection(ConfigurationManager.AppSettings["PosDbConnection"]);
-            _sqlConnection.Open();
         }
 
 
         ~FlashPosAvrRepository()
         {
-            _sqlConnection.Close();
         }
 
 
         public async Task Save(CheckInRequest data)
         {
-            DateTime currentTime = await GetServerTime();
+            await Task.Run(async () =>
+            {
+                DateTime currentTime = await GetServerTime();
 
-           SqlCommand cmd = new SqlCommand();
-            cmd.CommandType = System.Data.CommandType.Text;
+                SyncQueues ntdata = new SyncQueues
+                {
+                    SynqCount = 0,
+                    SynqData = JsonConvert.SerializeObject(data),
+                    SynqDataType = _dataType,
+                    SynqSyncDate = currentTime,
+                    SoftwareVersion = _softwareVersion,
+                    Timestamp = currentTime,
+                };
 
-            cmd.CommandText = $@"
-INSERT INTO [dbo].[SyncQueues]
-           [SynqDataType]
-           ,[SynqData]
-           ,[Timestamp]
-           ,[SynqCount]
-           ,[SynqSyncDate]
-           ,[SoftwareVersion])
-     VALUES
-           {_dataType}
-           ,{JsonConvert.SerializeObject(data)}
-           ,{currentTime}
-           ,{0}
-           ,{currentTime}
-           ,{_softwareVersion})
-";
-            cmd.Connection = _sqlConnection;
-
-            cmd.ExecuteNonQuery();
-            _sqlConnection.Close();
+                DataRepository.SyncQueuesProvider.Insert(ntdata);
+            });
         }
 
 
         private async Task<DateTime> GetServerTime()
         {
-            SqlCommand cmd = new SqlCommand();
+            DateTime time = DateTime.Now;
 
-            cmd.CommandType = System.Data.CommandType.Text;
-            cmd.CommandText = $@"select getdatetime()";
-            cmd.Connection = _sqlConnection;
+            await Task.Run(async () =>
+            {
+                time =  (DateTime)DataRepository.Provider.ExecuteScalar($@"select getdatetime()");
+            });
 
-            return (DateTime)(await cmd.ExecuteScalarAsync());
+            return time;
         }
 
 
@@ -88,9 +77,7 @@ order by timestamp desc
 
             await Task.Run(async () =>
             {
-                DataSet ds = new DataSet();
-                SqlDataAdapter adapter = new SqlDataAdapter(query, _sqlConnection);
-                adapter.Fill(ds);
+                var ds = DataRepository.Provider.ExecuteDataSet(CommandType.Text, query);
 
                 if (ds.Tables[0].Rows.Count > 0)
                 {
