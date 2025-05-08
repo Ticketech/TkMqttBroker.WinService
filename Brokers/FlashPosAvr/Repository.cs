@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Tk.Services.REST.Models.Stays;
 using Newtonsoft.Json;
 using System.Data;
+using System.Configuration;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
@@ -16,7 +17,12 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public FlashPosAvrRepository()
         {
-            _sqlConnection = new SqlConnection("YOUR CONNECTION STRING");
+            _softwareVersion = System.Reflection.Assembly.GetAssembly(
+                typeof(FlashPosAvrService)).GetName().Version.ToString();
+
+            _dataType = "FlashPosAvrBroker";
+
+            _sqlConnection = new SqlConnection(ConfigurationManager.AppSettings["PosDbConnection"]);
             _sqlConnection.Open();
         }
 

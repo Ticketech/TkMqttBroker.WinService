@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TkMqttBroker.WinService.Properties" GeneratedClassName="TkMqttBorker">
+  <Profiles />
+  <Settings>
+    <Setting Name="Welcome" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Hello world!</Value>
+    </Setting>
+    <Setting Name="PosDbConnection" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">pos db connection</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
