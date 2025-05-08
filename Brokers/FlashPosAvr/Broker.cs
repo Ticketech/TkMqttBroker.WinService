@@ -13,7 +13,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
         }
 
-        public void Start()
+        public async void Start()
         {
             //connect to cameras
             foreach(var config in _cameraConfigurations)
@@ -21,20 +21,23 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 var producer = new FlashAvrProducer(config);
                 _producers.Add(producer);
 
-                producer.Start();
+                await producer.Start();
             }
 
             //start rest sync
             _consumer = new PosAvrConsumer();
-            _consumer.Start();
+            await _consumer.Start();
         }
 
 
-        public void Stop()
+        public async void Stop()
         {
             //stop rest sync
+            await _consumer.Stop();
 
             //disconnect from cameras
+            foreach (var producer in _producers)
+                await producer.Stop();
         }
     }
 }

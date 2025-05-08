@@ -76,7 +76,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.Timeout = new TimeSpan(0, 1, 0);
 
-            return client
+            return client;
         }
     }
 }

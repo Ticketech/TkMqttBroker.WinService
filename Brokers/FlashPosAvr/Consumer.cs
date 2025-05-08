@@ -9,16 +9,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         private readonly FlashPosAvrRepository _repo;
         private readonly NGClient _ng;
+        private readonly FlashPosAvrMapper _mapper;
         Timer _timer;
+        private readonly SemaphoreSlim _semaphoreSlim;
 
 
         public PosAvrConsumer()
         {
             _repo = new FlashPosAvrRepository();
             _ng = new NGClient();
+            _mapper = new FlashPosAvrMapper();
+            _semaphoreSlim = new SemaphoreSlim(1);
         }
 
-        public void Start()
+        public async Task Start()
         {
             StartTimer();
         }
@@ -28,8 +32,26 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _timer = new Timer(async e => await OnTick(), null, 10000, Timeout.Infinite);
         }
 
+
+        public async Task Stop()
+        {
+            await _semaphoreSlim.WaitAsync();
+            try
+            {
+                if (_timer != null)
+                    _timer.Dispose();
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+        }
+
+
         private async Task OnTick()
         {
+            await _semaphoreSlim.WaitAsync();
+
             try
             {
                 CheckInRequest avrData = null;
@@ -38,16 +60,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     avrData = await _repo.GetUnsync();
 
                     if (avrData != null)
-                        await _ng.Send(avrData);
+                        await _ng.Send(_mapper.NGPostAvrEntryRawRequest(avrData));
 
                 } while (avrData != null);
             }
             finally
             {
                 StartTimer();
+                _semaphoreSlim.Release();
             }
         }
-
 
     }
 }

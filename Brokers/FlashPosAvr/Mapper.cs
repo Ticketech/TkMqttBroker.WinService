@@ -14,5 +14,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
             throw new NotImplementedException();
         }
+
+        internal NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest avrData)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

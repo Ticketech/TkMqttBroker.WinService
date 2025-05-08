@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Tk.Services.REST.Models.Stays;
 
@@ -24,25 +25,44 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly FlashPosAvrMapper _mapper;
         private readonly PosClient _pos;
         private IMqttClient _mqttClient;
-
+        private readonly SemaphoreSlim _semaphoreSlim;
 
         public FlashAvrProducer(FlashAvrProducerConfiguration configuration)
         {
-            this._cameraConfiguration = configuration;
+            _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
             _pos = new PosClient();
+
+            _semaphoreSlim = new SemaphoreSlim(1);
         }
 
 
-        public void Start()
+        public async Task Start()
         {
             //create client
-            CreateProducer();
+            await CreateProducer();
         }
 
 
-        private async void CreateProducer()
+        public async Task Stop()
+        {
+            await _semaphoreSlim.WaitAsync();
+
+            try
+            {
+                await _mqttClient.UnsubscribeAsync(_cameraConfiguration.Topic);
+                await _mqttClient.DisconnectAsync();
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+        }
+
+
+
+        private async Task CreateProducer()
         {
             // Create a MQTT client factory
             var factory = new MqttFactory();
@@ -98,10 +118,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //var messagePayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
 
-            CheckInRequest avrData = _mapper.PosAvrData(data);
-            await _repo.Save(avrData);
+            await _semaphoreSlim.WaitAsync();
 
-            await _pos.CheckInOutAVR(avrData);
+            try
+            {
+                CheckInRequest avrData = _mapper.PosAvrData(data);
+                await _repo.Save(avrData);
+
+                await _pos.CheckInOutAVR(avrData);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
 
