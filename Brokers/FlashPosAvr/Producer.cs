@@ -18,7 +18,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //credits: https://docs.google.com/document/d/1meiNhvV4Ooz-nrf5kF48nSXbK1YwT85rgXonwDnlf5o/edit?tab=t.0
 
 
-    public class FlashAvrProducer
+    public class FlashAvrProducer: IMqttApplicationMessageReceivedHandler
     {
         private FlashAvrProducerConfiguration _cameraConfiguration;
         private readonly FlashPosAvrRepository _repo;
@@ -39,8 +39,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _semaphoreSlim = new SemaphoreSlim(1);
 
             _mqttClient = mock;
-            _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
+            //_mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
+            _mqttClient.ApplicationMessageReceivedHandler = this;
         }
+
+
 
 
         public FlashAvrProducer(FlashAvrProducerConfiguration configuration)
@@ -150,7 +153,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
         }
 
-
+        public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
+        {
+            string hola = "Hello world!";
+        }
     }
 
 

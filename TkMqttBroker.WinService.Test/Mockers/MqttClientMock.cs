@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 
 namespace TkMqttBroker.WinService.Test.Mockers
 {
+
+
     public class MqttClientMock : IMqttClient
     {
 
@@ -29,13 +31,8 @@ namespace TkMqttBroker.WinService.Test.Mockers
         public IMqttApplicationMessageReceivedHandler ApplicationMessageReceivedHandler { get; set; }
 
 
-        Func<MqttApplicationMessageReceivedEventArgs, Task> func;
-        public IMqttClient UseApplicationMessageReceivedHandler(Func<MqttApplicationMessageReceivedEventArgs, Task> handler) 
-        {
-            func = handler;
-
-            return this;
-        }
+        public Func<MqttApplicationMessageReceivedEventArgs, Task> OnUseApplicationMessageReceivedEventAsync;
+      
 
 
         public async Task<MqttClientAuthenticateResult> ConnectAsync(IMqttClientOptions options, CancellationToken cancellationToken)
@@ -59,7 +56,8 @@ namespace TkMqttBroker.WinService.Test.Mockers
 
         public async Task<MqttClientPublishResult> PublishAsync(MqttApplicationMessage applicationMessage, CancellationToken cancellationToken)
         {
-            await func.Invoke(new MqttApplicationMessageReceivedEventArgs("MockClientId", applicationMessage));
+            await ApplicationMessageReceivedHandler.HandleApplicationMessageReceivedAsync(
+                new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
 
             return null;
         }
