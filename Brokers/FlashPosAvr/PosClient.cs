@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
@@ -17,9 +18,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public PosClient()
         {
-            _serviceUrl = ConfigurationManager.AppSettings["PosServiceUrl"];
-            _locationId = ConfigurationManager.AppSettings["LocationId"];
-            _apiKey = ConfigurationManager.AppSettings["PosApiKey"];
+            _serviceUrl = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.PosServiceUrl;
+            _locationId = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.LocationId;
+            _apiKey = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.PosApiKey;
         }
 
 
@@ -74,7 +75,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.Timeout = new TimeSpan(0, 1, 0);
+            client.Timeout = new TimeSpan(0, 0, 15);
 
             return client;
         }

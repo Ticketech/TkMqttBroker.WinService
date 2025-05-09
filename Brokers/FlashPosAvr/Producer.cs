@@ -4,6 +4,7 @@ using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
@@ -125,24 +126,48 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 await _mqttClient.SubscribeAsync(_cameraConfiguration.Topic);
 
                 // Callback function when a message is received
-                _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
+                //_mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
+                _mqttClient.ApplicationMessageReceivedHandler = this;
             }
 
         }
 
 
-        //produce data for pos avr
-        private async Task OnUseApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs data)
-        {
-            //// Convertir el payload a una cadena legible
-            //var messagePayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-            //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
+        ////produce data for pos avr
+        //private async Task OnUseApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs data)
+        //{
+        //    //// Convertir el payload a una cadena legible
+        //    //var messagePayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+        //    //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
 
+        //    await _semaphoreSlim.WaitAsync();
+
+        //    try
+        //    {
+        //        CheckInRequest avrData = _mapper.PosAvrData(data);
+        //        await _repo.Save(avrData);
+
+        //        await _pos.CheckInOutAVR(avrData);
+        //    }
+        //    finally
+        //    {
+        //        _semaphoreSlim.Release();
+        //    }
+        //}
+
+        public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
+        {
             await _semaphoreSlim.WaitAsync();
+
+            // Convertir el payload a una cadena legible
+            var messagePayload = Encoding.UTF8.GetString(data.ApplicationMessage.Payload);
+            //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
 
             try
             {
-                CheckInRequest avrData = _mapper.PosAvrData(data);
+                CheckInRequest avrData = _mapper.CheckInRequest(
+                    JsonConvert.DeserializeObject<FVRFlashAvrData>(messagePayload));
+
                 await _repo.Save(avrData);
 
                 await _pos.CheckInOutAVR(avrData);
@@ -151,11 +176,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 _semaphoreSlim.Release();
             }
-        }
-
-        public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
-        {
-            string hola = "Hello world!";
         }
     }
 

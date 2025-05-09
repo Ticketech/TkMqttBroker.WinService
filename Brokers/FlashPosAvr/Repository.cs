@@ -57,7 +57,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             await Task.Run(async () =>
             {
-                time =  (DateTime)DataRepository.Provider.ExecuteScalar($@"select getdatetime()");
+                time =  (DateTime)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"select getdate()");
             });
 
             return time;

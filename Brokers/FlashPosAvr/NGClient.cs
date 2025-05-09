@@ -17,8 +17,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public NGClient()
         {
-            _serviceUrl = ConfigurationManager.AppSettings["NGServiceUrl"];
-            _apiKey = ConfigurationManager.AppSettings["NGApiKey"];
+            _serviceUrl = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.NGServiceUrl;
+            _apiKey = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.NGApiKey;
         }
 
 

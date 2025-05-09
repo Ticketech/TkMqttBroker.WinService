@@ -10,14 +10,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
         }
 
-        internal CheckInRequest PosAvrData(MqttApplicationMessageReceivedEventArgs data)
+        internal CheckInRequest CheckInRequest(FVRFlashAvrData data)
         {
-            throw new NotImplementedException();
+            return new CheckInRequest();
         }
 
         internal NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest avrData)
         {
-            throw new NotImplementedException();
+            return new NGPostAvrEntryRawRequest();
         }
+
+
     }
 }

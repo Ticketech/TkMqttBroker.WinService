@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MQTTnet;
+using Newtonsoft.Json;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -39,8 +40,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             var producer = new FlashAvrProducer(configuration, mock);
 
-
-            string clientId = "";
+            string clientId = "FlashPosAvr-Test-ClientId";
 
             MqttApplicationMessage message = new MqttApplicationMessage
             {
@@ -52,12 +52,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             {
                 var data = new MqttApplicationMessageBuilder()
                  .WithTopic("test/topic")
-                 .WithPayload("¡Hola desde MQTT - Alvaro!")
+                 .WithPayload(JsonConvert.SerializeObject(new FVRFlashAvrData
+                 {
+                 }))
                  .WithExactlyOnceQoS()  // QoS 2 para entrega exacta
                  .WithRetainFlag()  // Conservar el mensaje en el broker
                  .Build();
                 await mock.PublishAsync(data, CancellationToken.None);
-            });
+            }).Wait();
 
         }
     }
