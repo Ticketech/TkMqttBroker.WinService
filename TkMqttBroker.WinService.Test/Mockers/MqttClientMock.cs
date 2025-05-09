@@ -8,12 +8,14 @@ using MQTTnet.Client.Publishing;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
 using MQTTnet.Client.Unsubscribing;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TkMqttBroker.WinService.Brokers.FlashPosAvr;
 
 namespace TkMqttBroker.WinService.Test.Mockers
 {
@@ -60,6 +62,25 @@ namespace TkMqttBroker.WinService.Test.Mockers
                 new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
 
             return null;
+        }
+
+        public async Task<FVRFlashAvrData> PublishSomething()
+        {
+            var payload = new FVRFlashAvrData
+            {
+                type = "testo",
+            };
+
+            var data = new MqttApplicationMessageBuilder()
+             .WithTopic("test/topic")
+             .WithPayload(JsonConvert.SerializeObject(payload))
+             .WithExactlyOnceQoS()  // QoS 2 para entrega exacta
+             .WithRetainFlag()  // Conservar el mensaje en el broker
+             .Build();
+
+            await PublishAsync(data, CancellationToken.None);
+
+            return payload;
         }
 
         public async Task SendExtendedAuthenticationExchangeDataAsync(MqttExtendedAuthenticationExchangeData data, CancellationToken cancellationToken)

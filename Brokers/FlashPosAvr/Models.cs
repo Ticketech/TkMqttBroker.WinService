@@ -19,6 +19,15 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string Password;
         public string ClientId;
         public string Topic; // public MqttClientSubscribeOptions Topic;
+
+
+        public FlashAvrProducerConfiguration Clone(string broker)
+        {
+            var clone = (FlashAvrProducerConfiguration)this.MemberwiseClone();
+            clone.Broker = broker;
+
+            return clone;
+        }
     }
 
 

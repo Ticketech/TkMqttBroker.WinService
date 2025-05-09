@@ -44,27 +44,9 @@ namespace TkMqttBroker.WinService.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NGServiceUrl {
-            get {
-                return ((string)(this["NGServiceUrl"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string NGApiKey {
             get {
                 return ((string)(this["NGApiKey"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PosServiceUrl {
-            get {
-                return ((string)(this["PosServiceUrl"]));
             }
         }
         
@@ -83,6 +65,24 @@ namespace TkMqttBroker.WinService.Properties {
         public string PosApiKey {
             get {
                 return ((string)(this["PosApiKey"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://mpk.parkingdreams.app")]
+        public string NGServiceUrl {
+            get {
+                return ((string)(this["NGServiceUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:55820")]
+        public string PosServiceUrl {
+            get {
+                return ((string)(this["PosServiceUrl"]));
             }
         }
     }

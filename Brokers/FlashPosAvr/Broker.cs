@@ -1,24 +1,55 @@
-﻿using System;
+﻿using MQTTnet.Client;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using TkMqttBroker.WinService.Pos;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    internal class FlashPosAvrBroker
+    public class FlashPosAvrBroker
     {
+        private readonly IMqttClient _mqttClient;
         private List<FlashPosAvrProducer> _producers = new List<FlashPosAvrProducer>();
         private FlashPosAvrConsumer _consumer;
-        private List<FlashAvrProducerConfiguration> _cameraConfigurations;
+        private FlashAvrProducerConfiguration _cameraMasterConfig;
+
 
         public FlashPosAvrBroker()
         {
+            var policy = PosPolicies.GetCurrentPolicies();
+
+            _cameraMasterConfig = new FlashAvrProducerConfiguration
+            {
+                ClientId = PosPolicies.LocationId(),
+                Password = policy.AVR.FlashAvr.Password,
+                Port = policy.AVR.FlashAvr.Port,
+                Topic = policy.AVR.FlashAvr.Topic,
+                Username = policy.AVR.FlashAvr.Username,
+            };
+
+            _mqttClient = null;
         }
 
-        public async void Start()
+
+
+        //for testing
+        public FlashPosAvrBroker(IMqttClient mock)
+        {
+            _mqttClient = mock;
+        }
+
+
+        public async Task Start()
         {
             //connect to cameras
-            foreach(var config in _cameraConfigurations)
+            foreach(string broker in PosPolicies.GetFlashPosAvrBrokers())
             {
-                var producer = new FlashPosAvrProducer(config);
+                FlashPosAvrProducer producer;
+                if (_mqttClient == null)
+                    producer = new FlashPosAvrProducer(_cameraMasterConfig.Clone(broker));
+                else
+                    producer = new FlashPosAvrProducer(_cameraMasterConfig.Clone(broker), _mqttClient);
+
                 _producers.Add(producer);
 
                 await producer.Start();
