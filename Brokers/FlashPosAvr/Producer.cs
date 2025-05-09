@@ -19,7 +19,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //credits: https://docs.google.com/document/d/1meiNhvV4Ooz-nrf5kF48nSXbK1YwT85rgXonwDnlf5o/edit?tab=t.0
 
 
-    public class FlashAvrProducer: IMqttApplicationMessageReceivedHandler
+    public class FlashPosAvrProducer: IMqttApplicationMessageReceivedHandler
     {
         private FlashAvrProducerConfiguration _cameraConfiguration;
         private readonly FlashPosAvrRepository _repo;
@@ -30,7 +30,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashAvrProducer(FlashAvrProducerConfiguration configuration, IMqttClient mock)
+        public FlashPosAvrProducer(FlashAvrProducerConfiguration configuration, IMqttClient mock)
         {
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
@@ -47,7 +47,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
-        public FlashAvrProducer(FlashAvrProducerConfiguration configuration)
+        public FlashPosAvrProducer(FlashAvrProducerConfiguration configuration)
         {
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();

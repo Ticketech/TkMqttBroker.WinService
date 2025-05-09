@@ -6,9 +6,11 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Tk.ConfigurationManager;
+using Tk.NetTiers;
 using Tk.Utilities.Log4Net;
 using TkMqttBroker.WinService.Brokers.FlashPosAvr;
 using TkMqttBroker.WinService.Test.Mockers;
+using TkMqttBroker.WinService.Test.Proxies;
 
 namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 {
@@ -33,12 +35,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         [TestMethod]
-        public void TestMethod1()
+        public void TestPublish()
         {
+            //tests publishing is captured by producer and processed accordingly
+
             FlashAvrProducerConfiguration configuration = null;
             MqttClientMock mock = new MqttClientMock();
 
-            var producer = new FlashAvrProducer(configuration, mock);
+            var producer = new FlashPosAvrProducer(configuration, mock);
 
             string clientId = "FlashPosAvr-Test-ClientId";
 
@@ -48,18 +52,31 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             MqttApplicationMessageReceivedEventArgs avrdata = new MqttApplicationMessageReceivedEventArgs(
                 clientId, message);
 
+            string testType = $"{DateTime.Now:yyyyMMddHHmmssffffff}";
+
+            int count1 = PosProxy.SyncQueue.Count();
+
             Task.Run(async () =>
             {
                 var data = new MqttApplicationMessageBuilder()
                  .WithTopic("test/topic")
                  .WithPayload(JsonConvert.SerializeObject(new FVRFlashAvrData
                  {
+                     type = testType,
                  }))
                  .WithExactlyOnceQoS()  // QoS 2 para entrega exacta
                  .WithRetainFlag()  // Conservar el mensaje en el broker
                  .Build();
                 await mock.PublishAsync(data, CancellationToken.None);
             }).Wait();
+
+            //sync queue
+            int count2 = PosProxy.SyncQueue.Count();
+
+            Assert.AreEqual(count1 + 1, count2);
+
+            //pos avr
+
 
         }
     }

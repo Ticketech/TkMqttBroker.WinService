@@ -5,8 +5,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     internal class FlashPosAvrBroker
     {
-        private List<FlashAvrProducer> _producers = new List<FlashAvrProducer>();
-        private PosAvrConsumer _consumer;
+        private List<FlashPosAvrProducer> _producers = new List<FlashPosAvrProducer>();
+        private FlashPosAvrConsumer _consumer;
         private List<FlashAvrProducerConfiguration> _cameraConfigurations;
 
         public FlashPosAvrBroker()
@@ -18,14 +18,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //connect to cameras
             foreach(var config in _cameraConfigurations)
             {
-                var producer = new FlashAvrProducer(config);
+                var producer = new FlashPosAvrProducer(config);
                 _producers.Add(producer);
 
                 await producer.Start();
             }
 
             //start rest sync
-            _consumer = new PosAvrConsumer();
+            _consumer = new FlashPosAvrConsumer();
             await _consumer.Start();
         }
 

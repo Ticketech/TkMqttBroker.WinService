@@ -32,9 +32,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Save(CheckInRequest data)
         {
-            await Task.Run(async () =>
+            await Task.Run((Func<Task>)(async () =>
             {
-                DateTime currentTime = await GetServerTime();
+                DateTime currentTime = await this.GetServerTime();
 
                 SyncQueues ntdata = new SyncQueues
                 {
@@ -47,7 +47,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 };
 
                 DataRepository.SyncQueuesProvider.Insert(ntdata);
-            });
+            }));
         }
 
 
@@ -64,31 +64,36 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public async Task<CheckInRequest> GetUnsync()
+        //fifo order
+        public async Task<SyncQueues> GetUnsync()
         {
-            CheckInRequest data = null;
-
-            string query = $@"
-select top 1 synqsyncdata
-from syncqueues
-where synqsyncdate is null
-order by timestamp desc
-";
+            SyncQueues data = null;
 
             await Task.Run(async () =>
             {
-                var ds = DataRepository.Provider.ExecuteDataSet(CommandType.Text, query);
+                int count = 0;
+                var sync = DataRepository.SyncQueuesProvider.GetPaged(
+                    $"synqdatatype = '{_dataType}' and synqsyncdate is null", $"timestamp asc", 0, 1, out count);
 
-                if (ds.Tables[0].Rows.Count > 0)
-                {
-                    data = JsonConvert.DeserializeObject<CheckInRequest>(ds.Tables[0].Rows[0]["synqsyncdata"].ToString());
-                }
+                if (count > 0)
+                    data = sync[0];
             });
 
             return data;
         }
 
+        internal async Task SetSynced(SyncQueues sync)
+        {
+            await Task.Run((Func<Task>)(async () =>
+            {
+                sync.SynqSyncDate = await this.GetServerTime();
+                sync.SynqCount++;
 
-        
+                sync.EntityState = EntityState.Changed;
+                DataRepository.SyncQueuesProvider.Save(sync);
+            }));
+        }
+
+     
     }
 }

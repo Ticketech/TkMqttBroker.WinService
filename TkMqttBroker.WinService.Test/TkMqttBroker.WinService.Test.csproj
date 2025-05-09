@@ -64,6 +64,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
       <Private>True</Private>
@@ -121,6 +122,10 @@
     <Reference Include="Tk.NetTiers.DataAccessLayer.SqlClient">
       <HintPath>..\References\Tk.NetTiers.DataAccessLayer.SqlClient.dll</HintPath>
     </Reference>
+    <Reference Include="Tk.Services.REST.Models, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\References\Tk.Services.REST.Models.dll</HintPath>
+    </Reference>
     <Reference Include="Tk.Utilities">
       <HintPath>..\References\Tk.Utilities.dll</HintPath>
     </Reference>
@@ -130,8 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Brokers\FlashPosAvr\ProducerTest.cs" />
+    <Compile Include="Brokers\FlashPosAvr\ConsumerTest.cs" />
     <Compile Include="Mockers\MqttClientMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Proxies\PosProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class PosAvrConsumer
+    public class FlashPosAvrConsumer
     {
         private readonly FlashPosAvrRepository _repo;
         private readonly NGClient _ng;
@@ -14,7 +15,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly SemaphoreSlim _semaphoreSlim;
 
 
-        public PosAvrConsumer()
+        public FlashPosAvrConsumer()
         {
             _repo = new FlashPosAvrRepository();
             _ng = new NGClient();
@@ -57,10 +58,18 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 CheckInRequest avrData = null;
                 do
                 {
-                    avrData = await _repo.GetUnsync();
+                    var sync = await _repo.GetUnsync();
 
-                    if (avrData != null)
+                    if (sync != null)
+                    {
+                        //todo: if it fails? 
+
+                        avrData =  JsonConvert.DeserializeObject<CheckInRequest>(sync.SynqData);
+
                         await _ng.Send(_mapper.NGPostAvrEntryRawRequest(avrData));
+
+                        await _repo.SetSynced(sync);
+                    }
 
                 } while (avrData != null);
             }
