@@ -21,7 +21,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     public class FlashPosAvrProducer: IMqttApplicationMessageReceivedHandler
     {
-        private FlashAvrProducerConfiguration _cameraConfiguration;
+        private FlashPosAvrProducerConfiguration _cameraConfiguration;
         private readonly FlashPosAvrRepository _repo;
         private readonly FlashPosAvrMapper _mapper;
         private readonly FlashPosAvrPosProxy _pos;
@@ -30,7 +30,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashPosAvrProducer(FlashAvrProducerConfiguration configuration, IMqttClient mock)
+        public FlashPosAvrProducer(FlashPosAvrProducerConfiguration configuration, IMqttClient mock)
         {
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
@@ -47,7 +47,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
-        public FlashPosAvrProducer(FlashAvrProducerConfiguration configuration)
+        public FlashPosAvrProducer(FlashPosAvrProducerConfiguration configuration)
         {
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
@@ -94,7 +94,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             // Create MQTT client options
             var options = new MqttClientOptionsBuilder()
                 .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
-                .WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
+                //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
                 .WithClientId(_cameraConfiguration.ClientId)
                 .WithCleanSession()
                 .WithTls(
@@ -108,14 +108,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         o.SslProtocol = SslProtocols.Tls12; ;
 
                         // Please provide the file path of your certificate file. The current directory is /bin.
-                        var certificate = new X509Certificate("/opt/emqxsl-ca.crt", "");
-                        o.Certificates = new List<X509Certificate> { certificate };
+                        //var certificate = new X509Certificate("/opt/emqxsl-ca.crt", "");
+                        //o.Certificates = new List<X509Certificate> { certificate };
                     }
                 )
                 .Build();
 
             //connect
-            var connectResult = await _mqttClient.ConnectAsync(options);
+            var connectResult = await _mqttClient.ConnectAsync(options, CancellationToken.None);
 
             //subscribe
             if (connectResult.ResultCode == MqttClientConnectResultCode.Success)
@@ -155,7 +155,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         //    }
         //}
 
-        public async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
+        public virtual async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
         {
             await _semaphoreSlim.WaitAsync();
 
@@ -178,6 +178,29 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
         }
     }
+
+
+
+    public class FlashPosAvrReader : FlashPosAvrProducer
+    {
+        public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+
+        public FlashPosAvrReader(FlashPosAvrProducerConfiguration configuration)
+            : base(configuration)
+        { }
+
+
+        public override async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
+        {
+            string otherdata = JsonConvert.SerializeObject(data);
+
+            logger.Info("FVR new message", "FVR Message", otherdata);
+        }
+
+    }
+
+
 
 
 

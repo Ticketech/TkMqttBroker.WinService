@@ -21,7 +21,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //}
 
 
-    public class FlashAvrProducerConfiguration
+    public class FlashPosAvrProducerConfiguration
     {
         public string IP;
         public int? Port;
@@ -32,9 +32,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
-        public FlashAvrProducerConfiguration Clone(DeviceConfiguration tkdevice)
+        public FlashPosAvrProducerConfiguration Clone(DeviceConfiguration tkdevice)
         {
-            var clone = (FlashAvrProducerConfiguration)this.MemberwiseClone();
+            var clone = (FlashPosAvrProducerConfiguration)this.MemberwiseClone();
             clone.IP = tkdevice.Location; //ip address
 
             return clone;

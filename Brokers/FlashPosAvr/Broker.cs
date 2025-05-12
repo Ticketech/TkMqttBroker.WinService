@@ -11,7 +11,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly IMqttClient _mqttClient;
         private List<FlashPosAvrProducer> _producers = new List<FlashPosAvrProducer>();
         private FlashPosAvrConsumer _consumer;
-        private FlashAvrProducerConfiguration _configuration;
+        private FlashPosAvrProducerConfiguration _configuration;
 
 
         public FlashPosAvrBroker()

@@ -52,11 +52,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public static FlashAvrProducerConfiguration GetBrokerConfiguration()
+        public static FlashPosAvrProducerConfiguration GetBrokerConfiguration()
         {
             var config = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default;
 
-            return new FlashAvrProducerConfiguration
+            return new FlashPosAvrProducerConfiguration
             {
                 ClientId = config.BrokerClientId,
                 Password = config.CameraPassword,
