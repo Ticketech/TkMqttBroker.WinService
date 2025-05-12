@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Configuration;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -11,22 +12,14 @@ using TkMqttBroker.WinService.Pos;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class PosClient
+    public class FlashPosAvrNGProxy
     {
-        private readonly string _serviceUrl;
-        private readonly string _locationId;
-        private readonly string _apiKey;
-
-        public PosClient()
-        {
-            _serviceUrl = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.PosServiceUrl;
-            _locationId = PosPolicies.LocationId();
-            _apiKey = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.PosApiKey;
-        }
+        private string _serviceUrl;
+        private string _apiKey;
 
 
 
-        public async Task<bool> CheckInOutAVR(CheckInRequest avrData)
+        public async Task<bool> Send(NGPostAvrEntryRawRequest data)
         {
             bool res = false;
 
@@ -34,8 +27,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 using (var client = GetClient())
                 {
-                    string ApiCall = _serviceUrl + $"/api/v2/UltraApi/Locations/{_locationId}/Stays/AVR";
-                    var request = new StringContent(JsonConvert.SerializeObject(avrData), Encoding.UTF8, "application/json");
+                    string ApiCall = _serviceUrl + $"/api/core/avr/entry/raw";
+                    var request = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                     var response = await client.PostAsync(ApiCall, request);
 
@@ -44,10 +37,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
 
-                    var result = JsonConvert.DeserializeObject<CheckInResponse>(responseStr);
-
-                    if (result.code != 0)
-                        throw new Exception($"Processing error. Code:{result.code}.Message:{result.message}.");
+                    if (response.StatusCode != HttpStatusCode.Created)
+                        throw new Exception($"Processing error. Code:{response.StatusCode}.Message:{responseStr}.");
 
                     res = true;
                 }
@@ -60,8 +51,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             return res;
         }
 
+
         private HttpClient GetClient()
         {
+            //config
+            if (_serviceUrl == null || _apiKey == null)
+            {
+                var policy = PosPolicies.GetCurrentPolicies();
+
+                _serviceUrl = policy.TicketechNG.NGService.ServiceUrl.Value;
+                _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(policy.TicketechNG.CoreApiKey.Value);
+            }
+
+
+            //http client
             var handler = new HttpClientHandler();
 
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;
@@ -76,7 +79,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.Timeout = new TimeSpan(0, 0, 15);
+            client.Timeout = new TimeSpan(0, 1, 0);
 
             return client;
         }

@@ -139,8 +139,8 @@
     <Compile Include="Brokers\FlashPosAvr\Broker.cs" />
     <Compile Include="Brokers\FlashPosAvr\Mapper.cs" />
     <Compile Include="Brokers\FlashPosAvr\Models.cs" />
-    <Compile Include="Brokers\FlashPosAvr\NGClient.cs" />
-    <Compile Include="Brokers\FlashPosAvr\PosClient.cs" />
+    <Compile Include="Brokers\FlashPosAvr\NGProxy.cs" />
+    <Compile Include="Brokers\FlashPosAvr\PosProxy.cs" />
     <Compile Include="Brokers\FlashPosAvr\Repository.cs" />
     <Compile Include="Brokers\FlashPosAvr\Producer.cs" />
     <Compile Include="Brokers\FlashPosAvr\Consumer.cs" />

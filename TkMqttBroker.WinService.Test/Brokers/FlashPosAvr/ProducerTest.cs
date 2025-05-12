@@ -54,7 +54,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             string testType = $"{DateTime.Now:yyyyMMddHHmmssffffff}";
 
-            int count1 = PosProxy.SyncQueue.Count();
+            int count1 = Proxies.PosProxy.SyncQueue.Count();
 
             Task.Run(async () =>
             {
@@ -71,7 +71,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             }).Wait();
 
             //sync queue
-            int count2 = PosProxy.SyncQueue.Count();
+            int count2 = Proxies.PosProxy.SyncQueue.Count();
 
             Assert.AreEqual(count1 + 1, count2);
 

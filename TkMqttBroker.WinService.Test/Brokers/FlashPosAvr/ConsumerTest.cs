@@ -39,8 +39,8 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
             //A.
-            PosProxy.SyncQueue.Clear();
-            SyncQueues sync = PosProxy.SyncQueue.AddFlashPosAvr();
+            Proxies.PosProxy.SyncQueue.Clear();
+            SyncQueues sync = Proxies.PosProxy.SyncQueue.AddFlashPosAvr();
 
             Task.Run(async () =>
             {
@@ -49,7 +49,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 Thread.Sleep(30000);
             }).Wait();
 
-            sync = PosProxy.SyncQueue.GetLatest();
+            sync = Proxies.PosProxy.SyncQueue.GetLatest();
 
             Assert.IsNotNull(sync.SynqSyncDate);
         }

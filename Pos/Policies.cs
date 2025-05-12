@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace TkMqttBroker.WinService.Pos
 
         public static string LocationId()
         {
-            return (string)DataRepository.Provider.ExecuteScalar($@"
+            return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
 select top 1 locationid
 from versions ver, locations loc
 where ver.locationguid = loc.locationguid"
@@ -55,7 +56,7 @@ where ver.locationguid = loc.locationguid"
 
 
         //list of camera ips
-        internal static List<TKDEV.DeviceConfiguration> GetPosAvrConfigurations()
+        public static List<TKDEV.DeviceConfiguration> GetPosAvrConfigurations()
         {
             List<TKDEV.DeviceConfiguration> configs = new List<TKDEV.DeviceConfiguration>();
 

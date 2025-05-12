@@ -24,7 +24,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private FlashAvrProducerConfiguration _cameraConfiguration;
         private readonly FlashPosAvrRepository _repo;
         private readonly FlashPosAvrMapper _mapper;
-        private readonly PosClient _pos;
+        private readonly FlashPosAvrPosProxy _pos;
         private IMqttClient _mqttClient;
         private readonly SemaphoreSlim _semaphoreSlim;
 
@@ -35,7 +35,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
-            _pos = new PosClient();
+            _pos = new FlashPosAvrPosProxy();
 
             _semaphoreSlim = new SemaphoreSlim(1);
 
@@ -52,7 +52,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
-            _pos = new PosClient();
+            _pos = new FlashPosAvrPosProxy();
 
             _semaphoreSlim = new SemaphoreSlim(1);
         }

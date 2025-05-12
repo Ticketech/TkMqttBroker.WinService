@@ -9,7 +9,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     public class FlashPosAvrConsumer
     {
         private readonly FlashPosAvrRepository _repo;
-        private readonly NGClient _ng;
+        private readonly FlashPosAvrNGProxy _ng;
         private readonly FlashPosAvrMapper _mapper;
         Timer _timer;
         private readonly SemaphoreSlim _semaphoreSlim;
@@ -18,7 +18,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public FlashPosAvrConsumer()
         {
             _repo = new FlashPosAvrRepository();
-            _ng = new NGClient();
+            _ng = new FlashPosAvrNGProxy();
             _mapper = new FlashPosAvrMapper();
             _semaphoreSlim = new SemaphoreSlim(1);
         }
