@@ -61,7 +61,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public async Task Start()
         {
             //create client
-            if (_mqttClient != null)
+            if (_mqttClient == null)
                 await CreateProducer();
         }
 

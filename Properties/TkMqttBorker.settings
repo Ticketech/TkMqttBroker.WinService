@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TkMqttBroker.WinService.Properties" GeneratedClassName="TkMqttBorker">
   <Profiles />
   <Settings>
-    <Setting Name="PosDbConnection" Type="System.String" Scope="Application">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="PosApiKey" Type="System.String" Scope="Application">
       <Value Profile="(Default)" />
     </Setting>

@@ -52,7 +52,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public async void Stop()
+        public async Task Stop()
         {
             //stop rest sync
             await _consumer.Stop();

@@ -8,11 +8,42 @@ using Tk.NetTiers.DataAccessLayer;
 using System.Data;
 using Newtonsoft.Json;
 using Tk.Services.REST.Models.Stays;
+using System.Data;
+
 
 namespace TkMqttBroker.WinService.Test.Proxies
 {
     public static class PosProxy
     {
+
+
+        public static class Workstations
+        {
+            public static void AddAVRFlash()
+            {
+                DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
+delete from LocationsMachinesConfigurations 
+where MachineName = 'FLASH077'
+");
+
+                DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
+insert into LocationsMachinesConfigurations
+select LocationGUID, 'FLASH077', LocationMachineConfigurationSection, ConfigurationTypeCode, MachineConfigurationValue, SoftwareVersion
+from LocationsMachinesConfigurations
+where MachineName = 'avr070'
+and ConfigurationTypeCode = 0;"
+);
+
+
+                DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
+update LocationsMachinesConfigurations
+set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" quality=""50"" location=""192.168.1.10"" /></posDevices>'
+where MachineName = 'flash077' and LocationMachineConfigurationSection = 'posdevices'"
+);
+            }
+        }
+
+
 
         public static class SyncQueue
         {
