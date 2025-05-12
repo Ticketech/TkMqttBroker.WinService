@@ -15,14 +15,14 @@ using TkMqttBroker.WinService.Brokers.FlashPosAvr;
 using TKDEV = Tk.ConfigurationManager.DevicesConfiguration;
 
 
-namespace TkMqttBroker.WinService.Pos
+namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public static class PosPolicies
+    public static class FlashPosAvrPolicies
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-        static PosPolicies()
+        static FlashPosAvrPolicies()
         {
             try
             {

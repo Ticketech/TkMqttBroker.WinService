@@ -7,8 +7,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Tk.ConfigurationManager;
-using Tk.Services.REST.Models.Stays;
-using TkMqttBroker.WinService.Pos;
+
+
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
@@ -57,7 +57,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //config
             if (_serviceUrl == null || _apiKey == null)
             {
-                var policy = PosPolicies.GetCurrentPolicies();
+                var policy = FlashPosAvrPolicies.GetCurrentPolicies();
 
                 _serviceUrl = policy.TicketechNG.NGService.ServiceUrl.Value;
                 _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(policy.TicketechNG.CoreApiKey.Value);

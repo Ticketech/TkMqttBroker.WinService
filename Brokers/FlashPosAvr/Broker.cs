@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TkMqttBroker.WinService.Pos;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
+    //gmz.next. created.
     public class FlashPosAvrBroker
     {
         private readonly IMqttClient _mqttClient;
@@ -30,10 +30,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Start()
         {
-            _configuration = PosPolicies.GetBrokerConfiguration();
+            _configuration = FlashPosAvrPolicies.GetBrokerConfiguration();
 
             //connect to cameras
-            foreach(var avrConfig in PosPolicies.GetPosAvrConfigurations())
+            foreach(var avrConfig in FlashPosAvrPolicies.GetPosAvrConfigurations())
             {
                 FlashPosAvrProducer producer;
                 if (_mqttClient == null)

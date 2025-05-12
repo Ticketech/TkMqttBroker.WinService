@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
-using TkMqttBroker.WinService.Pos;
+
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
@@ -22,7 +22,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             var config = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default;
 
             _serviceUrl = config.PosServiceUrl;
-            _locationId = PosPolicies.LocationId();
+            _locationId = FlashPosAvrPolicies.LocationId();
             _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(config.PosApiKey);
         }
 

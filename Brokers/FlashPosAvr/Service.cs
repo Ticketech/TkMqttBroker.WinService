@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
+    //gmz.next. created.
     public partial class FlashPosAvrService : ServiceBase
     {
         private FlashPosAvrBroker _broker;
