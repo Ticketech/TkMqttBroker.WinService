@@ -25,37 +25,10 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Hello world!")]
-        public string Welcome {
-            get {
-                return ((string)(this["Welcome"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("pos db connection")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string PosDbConnection {
             get {
                 return ((string)(this["PosDbConnection"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string NGApiKey {
-            get {
-                return ((string)(this["NGApiKey"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LocationId {
-            get {
-                return ((string)(this["LocationId"]));
             }
         }
         
@@ -70,19 +43,55 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://mpk.parkingdreams.app")]
-        public string NGServiceUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:55820")]
+        public string PosServiceUrl {
             get {
-                return ((string)(this["NGServiceUrl"]));
+                return ((string)(this["PosServiceUrl"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:55820")]
-        public string PosServiceUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("FlashPosBrokerId")]
+        public string BrokerClientId {
             get {
-                return ((string)(this["PosServiceUrl"]));
+                return ((string)(this["BrokerClientId"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("FlashPosBrokerTopic")]
+        public string BrokerTopic {
+            get {
+                return ((string)(this["BrokerTopic"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CameraUsername {
+            get {
+                return ((string)(this["CameraUsername"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CameraPassword {
+            get {
+                return ((string)(this["CameraPassword"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CameraPort {
+            get {
+                return ((int)(this["CameraPort"]));
             }
         }
     }

@@ -1,11 +1,16 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tk.Business.Policies;
+using Tk.ConfigurationManager;
 using Tk.NetTiers.DataAccessLayer;
+using TkMqttBroker.WinService.Brokers.FlashPosAvr;
+using TKDEV = Tk.ConfigurationManager.DevicesConfiguration;
+
 
 namespace TkMqttBroker.WinService.Pos
 {
@@ -24,10 +29,48 @@ namespace TkMqttBroker.WinService.Pos
         }
 
 
-        //list of camera ips
-        internal static IEnumerable<string> GetFlashPosAvrBrokers()
+        public static FlashAvrProducerConfiguration GetBrokerConfiguration()
         {
-            throw new NotImplementedException();
+            var config = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default;
+
+            return new FlashAvrProducerConfiguration
+            {
+                ClientId = config.BrokerClientId,
+                Password = config.CameraPassword,
+                Port = config.CameraPort,
+                Topic = config.BrokerTopic,
+                Username = config.CameraUsername,
+            };
+        }
+
+
+        public static string LocationId()
+        {
+            return (string)DataRepository.Provider.ExecuteScalar($@"
+select top 1 locationid
+from versions ver, locations loc
+where ver.locationguid = loc.locationguid"
+                );
+        }
+
+
+        //list of camera ips
+        internal static List<TKDEV.DeviceConfiguration> GetPosAvrConfigurations()
+        {
+            List<TKDEV.DeviceConfiguration> configs = new List<TKDEV.DeviceConfiguration>();
+
+            foreach (var workstationId in TkConfigurationManager.GetWorkstations())
+            {
+                foreach(var device in TkConfigurationManager.GetDevices(workstationId))
+                {
+                    if (device.Type == "AVR" && device.Model == "FlashAvr")
+                    {
+                        configs.Add(device);
+                    }
+                }
+            }
+
+            return configs;
         }
     }
 }

@@ -93,7 +93,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             // Create MQTT client options
             var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(_cameraConfiguration.Broker, _cameraConfiguration.Port) // MQTT broker address and port
+                .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
                 .WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
                 .WithClientId(_cameraConfiguration.ClientId)
                 .WithCleanSession()

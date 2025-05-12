@@ -6,20 +6,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
+using TkMqttBroker.WinService.Pos;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    internal class NGClient
+    public class NGClient
     {
-        private readonly string _serviceUrl;
-        private readonly string _apiKey;
+        private string _serviceUrl;
+        private string _apiKey;
 
-        public NGClient()
-        {
-            _serviceUrl = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.NGServiceUrl;
-            _apiKey = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default.NGApiKey;
-        }
 
 
         public async Task<bool> Send(NGPostAvrEntryRawRequest data)
@@ -57,6 +54,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private HttpClient GetClient()
         {
+            //config
+            if (_serviceUrl == null || _apiKey == null)
+            {
+                var policy = PosPolicies.GetCurrentPolicies();
+
+                _serviceUrl = policy.TicketechNG.NGService.ServiceUrl.Value;
+                _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(policy.TicketechNG.CoreApiKey.Value);
+            }
+
+
+            //http client
             var handler = new HttpClientHandler();
 
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;

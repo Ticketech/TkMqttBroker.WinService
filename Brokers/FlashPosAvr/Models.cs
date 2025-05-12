@@ -6,14 +6,24 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tk.ConfigurationManager.DevicesConfiguration;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
 
+    //public class FlashPosAvrBrokerConfiguration
+    //{
+    //    public string Password;
+    //    public int Port;
+    //    public string Topic;
+    //    public string Username;
+
+    //}
+
 
     public class FlashAvrProducerConfiguration
     {
-        public string Broker;
+        public string IP;
         public int? Port;
         public string Username;
         public string Password;
@@ -21,10 +31,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string Topic; // public MqttClientSubscribeOptions Topic;
 
 
-        public FlashAvrProducerConfiguration Clone(string broker)
+
+        public FlashAvrProducerConfiguration Clone(DeviceConfiguration tkdevice)
         {
             var clone = (FlashAvrProducerConfiguration)this.MemberwiseClone();
-            clone.Broker = broker;
+            clone.IP = tkdevice.Location; //ip address
 
             return clone;
         }
