@@ -22,15 +22,7 @@ namespace TkMqttBroker.WinService
         /// </summary>
         static void Main()
         {
-            //log4net
-            Log4NetHelper.Init();
-            Tk.NetTiers.DataAccessLayer.TransactionManager trmgr = Tk.NetTiers.DataAccessLayer.DataRepository.Provider.CreateTransaction();
-            Log4NetHelper.setAdoNetAppenderConnection(trmgr.ConnectionString);
-            ConfigFileSections configFileSections = (ConfigFileSections)System.Configuration.ConfigurationManager.GetSection("currentLocationGUID");
-            Log4NetHelper.setLocationGuid(new Guid(configFileSections.CurrentLocationGUID));
-            Log4NetHelper.setSoftwareVersion(Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString());
-            trmgr.Dispose();
-
+            FlashPosAvrInitializer.Initialize();
 
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]

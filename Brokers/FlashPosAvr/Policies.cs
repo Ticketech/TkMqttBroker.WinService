@@ -22,33 +22,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-        static FlashPosAvrPolicies()
-        {
-            try
-            {
-                Locations locations = Tk.ConfigurationManager.TkConfigurationManager.GetLocationsFromConfigFile();
-
-                if (locations == null)
-                {
-                    int hasElemts = 0;
-
-                    locations = DataRepository.LocationsProvider.GetPaged(0, 1, out hasElemts)[0];
-                }
-
-                Tk.ConfigurationManager.TkConfigurationManager.CurrentLocationGUID = locations.LocationGUID;
-                Tk.ConfigurationManager.TkConfigurationManager.CurrentCompanyGUID = locations.CompanyGUID;
-                Tk.ConfigurationManager.TkConfigurationManager.CurrentLocationCode = locations.LocationCode.Trim(); //gmz.33.0.
-                Tk.ConfigurationManager.TkConfigurationManager.CurrentLocationId = locations.LocationId.Trim(); //gmz.33.0.
-
-            }
-            catch (Exception e)
-            {
-                logger.Error(e.Message, "InitializerManager Error", e);
-                throw;
-            }
-        }
-
-
         public static LocationPolicies GetCurrentPolicies()
         {
             

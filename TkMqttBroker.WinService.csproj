@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Brokers\FlashPosAvr\Broker.cs" />
+    <Compile Include="Brokers\FlashPosAvr\Initializer.cs" />
     <Compile Include="Brokers\FlashPosAvr\Mapper.cs" />
     <Compile Include="Brokers\FlashPosAvr\Models.cs" />
     <Compile Include="Brokers\FlashPosAvr\NGProxy.cs" />
