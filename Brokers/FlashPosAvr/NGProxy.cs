@@ -57,7 +57,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //config
             if (_serviceUrl == null || _apiKey == null)
             {
-                var policy = FlashPosAvrPolicies.GetCurrentPolicies();
+                var policy = FlashPosAvrPolicy.GetCurrentPolicies();
 
                 _serviceUrl = policy.TicketechNG.NGService.ServiceUrl.Value;
                 _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(policy.TicketechNG.CoreApiKey.Value);

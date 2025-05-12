@@ -22,7 +22,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             var config = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default;
 
             _serviceUrl = config.PosServiceUrl;
-            _locationId = FlashPosAvrPolicies.LocationId();
+            _locationId = FlashPosAvrPolicy.LocationId();
             _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(config.PosApiKey);
         }
 

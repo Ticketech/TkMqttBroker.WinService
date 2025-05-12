@@ -30,10 +30,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Start()
         {
-            _configuration = FlashPosAvrPolicies.GetBrokerConfiguration();
+            _configuration = FlashPosAvrPolicy.GetBrokerConfiguration();
 
             //connect to cameras
-            foreach(var avrConfig in FlashPosAvrPolicies.GetPosAvrConfigurations())
+            foreach(var avrConfig in FlashPosAvrPolicy.GetPosAvrConfigurations())
             {
                 FlashPosAvrProducer producer;
                 if (_mqttClient == null)

@@ -17,7 +17,7 @@ using TKDEV = Tk.ConfigurationManager.DevicesConfiguration;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public static class FlashPosAvrPolicies
+    public static class FlashPosAvrPolicy
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
