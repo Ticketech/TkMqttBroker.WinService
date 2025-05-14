@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TkMqttBroker.WinService.Properties" GeneratedClassName="TkMqttBorker">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TkMqttBroker.WinService.Properties" GeneratedClassName="FlashPosAvr">
   <Profiles />
   <Settings>
     <Setting Name="PosApiKey" Type="System.String" Scope="Application">
@@ -10,9 +10,6 @@
     </Setting>
     <Setting Name="BrokerClientId" Type="System.String" Scope="Application">
       <Value Profile="(Default)">FlashPosBrokerId</Value>
-    </Setting>
-    <Setting Name="BrokerTopic" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">FlashPosBrokerTopic</Value>
     </Setting>
     <Setting Name="CameraPort" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">0</Value>

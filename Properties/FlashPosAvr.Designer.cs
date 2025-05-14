@@ -52,15 +52,6 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("FlashPosBrokerTopic")]
-        public string BrokerTopic {
-            get {
-                return ((string)(this["BrokerTopic"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int CameraPort {
             get {

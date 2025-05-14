@@ -29,7 +29,6 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 ClientId = "FlashPosAvrBroker",
                 IP = "10.30.50.106", // "broker.hivemq.com"
                 Port = 1884,
-                Topic = "detection",
             };
             var reader = new FlashPosAvrReader(configuration);
 
