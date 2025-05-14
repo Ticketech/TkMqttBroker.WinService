@@ -161,19 +161,19 @@
     <Compile Include="Brokers\FlashPosAvr\Policy.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\TkMqttBorker.Designer.cs">
+    <Compile Include="Properties\FlashPosAvr.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>TkMqttBorker.settings</DependentUpon>
+      <DependentUpon>FlashPosAvr.settings</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="log4net.config" />
     <None Include="packages.config" />
-    <None Include="Properties\TkMqttBorker.settings">
+    <None Include="Properties\FlashPosAvr.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>TkMqttBorker.Designer.cs</LastGenOutput>
+      <LastGenOutput>FlashPosAvr.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

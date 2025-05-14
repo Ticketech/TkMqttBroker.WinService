@@ -13,11 +13,11 @@ namespace TkMqttBroker.WinService.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
-    internal sealed partial class TkMqttBorker : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class FlashPosAvr : global::System.Configuration.ApplicationSettingsBase {
         
-        private static TkMqttBorker defaultInstance = ((TkMqttBorker)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new TkMqttBorker())));
+        private static FlashPosAvr defaultInstance = ((FlashPosAvr)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new FlashPosAvr())));
         
-        public static TkMqttBorker Default {
+        public static FlashPosAvr Default {
             get {
                 return defaultInstance;
             }
@@ -56,24 +56,6 @@ namespace TkMqttBroker.WinService.Properties {
         public string BrokerTopic {
             get {
                 return ((string)(this["BrokerTopic"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CameraUsername {
-            get {
-                return ((string)(this["CameraUsername"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CameraPassword {
-            get {
-                return ((string)(this["CameraPassword"]));
             }
         }
         

@@ -14,12 +14,6 @@
     <Setting Name="BrokerTopic" Type="System.String" Scope="Application">
       <Value Profile="(Default)">FlashPosBrokerTopic</Value>
     </Setting>
-    <Setting Name="CameraUsername" Type="System.String" Scope="Application">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="CameraPassword" Type="System.String" Scope="Application">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="CameraPort" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">0</Value>
     </Setting>

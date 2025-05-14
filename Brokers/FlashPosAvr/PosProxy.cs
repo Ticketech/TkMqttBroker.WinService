@@ -19,7 +19,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public FlashPosAvrPosProxy()
         {
-            var config = global::TkMqttBroker.WinService.Properties.TkMqttBorker.Default;
+            var config = global::TkMqttBroker.WinService.Properties.FlashPosAvr.Default;
 
             _serviceUrl = config.PosServiceUrl;
             _locationId = FlashPosAvrPolicy.LocationId();

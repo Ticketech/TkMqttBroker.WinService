@@ -25,8 +25,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         public string IP;
         public int? Port;
-        public string Username;
-        public string Password;
         public string ClientId;
         public string Topic; // public MqttClientSubscribeOptions Topic;
 

@@ -120,7 +120,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //subscribe
             if (connectResult.ResultCode == MqttClientConnectResultCode.Success)
             {
-                Console.WriteLine("Connected to MQTT broker successfully.");
+                //Console.WriteLine("Connected to MQTT broker successfully.");
 
                 // Subscribe to a topic
                 await _mqttClient.SubscribeAsync(_cameraConfiguration.Topic);
