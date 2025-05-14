@@ -364,3 +364,5 @@ FodyWeavers.xsd
 App.config
 App.config
 TkMqttBroker.WinService.Test/App.config
+App.config
+TkMqttBroker.WinService.Test/App.config
