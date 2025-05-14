@@ -21,7 +21,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
 {
 
 
-    public class MqttClientMock : IMqttClient
+    public class MqttClientMock : IMqttClientMock
     {
 
         public bool IsConnected => true;
@@ -34,8 +34,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
 
 
         public Func<MqttApplicationMessageReceivedEventArgs, Task> OnUseApplicationMessageReceivedEventAsync;
-      
-
+        private Func<MqttApplicationMessageReceivedEventArgs, Task> _useApplicationMessageReceivedHandler;
 
         public async Task<MqttClientAuthenticateResult> ConnectAsync(IMqttClientOptions options, CancellationToken cancellationToken)
         {
@@ -56,13 +55,22 @@ namespace TkMqttBroker.WinService.Test.Mockers
             throw new NotImplementedException();
         }
 
+        //public async Task<MqttClientPublishResult> PublishAsync(MqttApplicationMessage applicationMessage, CancellationToken cancellationToken)
+        //{
+        //    await ApplicationMessageReceivedHandler.HandleApplicationMessageReceivedAsync(
+        //        new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
+
+        //    return null;
+        //}
+
+
         public async Task<MqttClientPublishResult> PublishAsync(MqttApplicationMessage applicationMessage, CancellationToken cancellationToken)
         {
-            await ApplicationMessageReceivedHandler.HandleApplicationMessageReceivedAsync(
-                new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
+            await _useApplicationMessageReceivedHandler.Invoke(new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
 
             return null;
         }
+
 
         public async Task<FVRFlashAvrData> PublishSomething()
         {
@@ -97,5 +105,12 @@ namespace TkMqttBroker.WinService.Test.Mockers
         {
             return null;
         }
+
+        public void UseApplicationMessageReceivedHandler_Mock(Func<MqttApplicationMessageReceivedEventArgs, Task> handler)
+        {
+            _useApplicationMessageReceivedHandler = handler;
+        }
     }
+
+
 }

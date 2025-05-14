@@ -52,7 +52,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             Task.Run(async () =>
             {
                 var data = new MqttApplicationMessageBuilder()
-                 .WithTopic("test/topic")
+                 .WithTopic("detection")
                  .WithPayload(JsonConvert.SerializeObject(new FVRFlashAvrData
                  {
                      type = testType,

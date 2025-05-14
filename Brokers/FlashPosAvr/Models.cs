@@ -1,4 +1,6 @@
-﻿using MQTTnet.Client.Subscribing;
+﻿using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Client.Subscribing;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,14 +22,18 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     //}
 
+    //mock mqtt client
+    public interface IMqttClientMock: IMqttClient
+    {
+        void UseApplicationMessageReceivedHandler_Mock(Func<MqttApplicationMessageReceivedEventArgs, Task> handler);
+    }
+
 
     public class FlashPosAvrProducerConfiguration
     {
         public string IP;
         public int? Port;
         public string ClientId;
-        public readonly string Topic = "detection";
-
 
 
         public FlashPosAvrProducerConfiguration Clone(DeviceConfiguration tkdevice)

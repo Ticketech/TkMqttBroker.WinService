@@ -19,7 +19,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //credits: https://docs.google.com/document/d/1meiNhvV4Ooz-nrf5kF48nSXbK1YwT85rgXonwDnlf5o/edit?tab=t.0
 
 
-    public class FlashPosAvrProducer: IMqttApplicationMessageReceivedHandler
+    public class FlashPosAvrProducer //: IMqttApplicationMessageReceivedHandler
     {
         private FlashPosAvrProducerConfiguration _cameraConfiguration;
         private readonly FlashPosAvrRepository _repo;
@@ -30,7 +30,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashPosAvrProducer(FlashPosAvrProducerConfiguration configuration, IMqttClient mock)
+        public FlashPosAvrProducer(FlashPosAvrProducerConfiguration configuration, IMqttClientMock mock)
         {
             _cameraConfiguration = configuration;
             _repo = new FlashPosAvrRepository();
@@ -39,9 +39,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             _semaphoreSlim = new SemaphoreSlim(1);
 
+            mock.UseApplicationMessageReceivedHandler_Mock(async e => await OnUseApplicationMessageReceivedEvent(e));
             _mqttClient = mock;
-            //_mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
-            _mqttClient.ApplicationMessageReceivedHandler = this;
         }
 
 
@@ -72,7 +71,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             try
             {
-                await _mqttClient.UnsubscribeAsync(_cameraConfiguration.Topic);
+                await _mqttClient.UnsubscribeAsync("detection");
+                await _mqttClient.UnsubscribeAsync("heartbeat");
                 await _mqttClient.DisconnectAsync();
             }
             finally
@@ -120,31 +120,72 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //subscribe
             if (connectResult.ResultCode == MqttClientConnectResultCode.Success)
             {
-                //Console.WriteLine("Connected to MQTT broker successfully.");
-
                 // Subscribe to a topic
-                await _mqttClient.SubscribeAsync(_cameraConfiguration.Topic);
+                await _mqttClient.SubscribeAsync("detection");
+                await _mqttClient.SubscribeAsync("heartbeat");
 
                 // Callback function when a message is received
-                //_mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceived(e));
-                _mqttClient.ApplicationMessageReceivedHandler = this;
+                //_mqttClient.ApplicationMessageReceivedHandler = this;
+                _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceivedEvent(e));
             }
 
         }
 
 
         ////produce data for pos avr
-        //private async Task OnUseApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs data)
-        //{
-        //    //// Convertir el payload a una cadena legible
-        //    //var messagePayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-        //    //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
+        protected virtual async Task OnUseApplicationMessageReceivedEvent(MqttApplicationMessageReceivedEventArgs e)
+        {
+            //todo: respond to all events
 
+            try
+            {
+                await _semaphoreSlim.WaitAsync();
+
+                var topic = e.ApplicationMessage.Topic;
+                // Convertir el payload a una cadena legible
+                var strPayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+
+                if (topic == "detection")
+                {
+                    //ack mqtt
+
+                    CheckInRequest avrData = _mapper.CheckInRequest(
+                        JsonConvert.DeserializeObject<FVRFlashAvrData>(strPayload));
+
+                    //save data to sync ng
+                    await _repo.Save(avrData);
+
+                    //call pos
+                    await _pos.CheckInOutAVR(avrData);
+                }
+                else if (topic == "heartbeat")
+                {
+                    //ack
+                }
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
+        }
+
+
+
+
+
+        //public virtual async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
+        //{
         //    await _semaphoreSlim.WaitAsync();
+
+        //    // Convertir el payload a una cadena legible
+        //    var messagePayload = Encoding.UTF8.GetString(data.ApplicationMessage.Payload);
+        //    //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
 
         //    try
         //    {
-        //        CheckInRequest avrData = _mapper.PosAvrData(data);
+        //        CheckInRequest avrData = _mapper.CheckInRequest(
+        //            JsonConvert.DeserializeObject<FVRFlashAvrData>(messagePayload));
+
         //        await _repo.Save(avrData);
 
         //        await _pos.CheckInOutAVR(avrData);
@@ -154,29 +195,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         //        _semaphoreSlim.Release();
         //    }
         //}
-
-        public virtual async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
-        {
-            await _semaphoreSlim.WaitAsync();
-
-            // Convertir el payload a una cadena legible
-            var messagePayload = Encoding.UTF8.GetString(data.ApplicationMessage.Payload);
-            //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
-
-            try
-            {
-                CheckInRequest avrData = _mapper.CheckInRequest(
-                    JsonConvert.DeserializeObject<FVRFlashAvrData>(messagePayload));
-
-                await _repo.Save(avrData);
-
-                await _pos.CheckInOutAVR(avrData);
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
-        }
     }
 
 
@@ -191,7 +209,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         { }
 
 
-        public override async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
+        protected override async Task OnUseApplicationMessageReceivedEvent(MqttApplicationMessageReceivedEventArgs data)
         {
             string otherdata = JsonConvert.SerializeObject(data);
 

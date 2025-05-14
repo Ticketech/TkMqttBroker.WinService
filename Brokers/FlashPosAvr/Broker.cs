@@ -22,7 +22,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashPosAvrBroker(IMqttClient mock)
+        public FlashPosAvrBroker(IMqttClientMock mock)
         {
             _mqttClient = mock;
         }
@@ -39,7 +39,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 if (_mqttClient == null)
                     producer = new FlashPosAvrProducer(_configuration.Clone(avrConfig));
                 else
-                    producer = new FlashPosAvrProducer(_configuration.Clone(avrConfig), _mqttClient);
+                    producer = new FlashPosAvrProducer(_configuration.Clone(avrConfig), _mqttClient as IMqttClientMock);
 
                 _producers.Add(producer);
 
