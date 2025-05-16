@@ -151,7 +151,6 @@
     <Compile Include="Brokers\FlashPosAvr\PosProxy.cs" />
     <Compile Include="Brokers\FlashPosAvr\Repository.cs" />
     <Compile Include="Brokers\FlashPosAvr\Producer.cs" />
-    <Compile Include="Brokers\FlashPosAvr\Consumer.cs" />
     <Compile Include="Brokers\FlashPosAvr\Service.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -40,7 +40,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             {
                 await broker.Start();
 
-                FVRFlashAvrData data = await mqttClient.PublishSomething();
+                FVRPayload data = await mqttClient.PublishSomething();
 
                 Thread.Sleep(30000);
 

@@ -21,18 +21,24 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     public class FlashPosAvrProducer //: IMqttApplicationMessageReceivedHandler
     {
-        private FlashPosAvrProducerConfiguration _cameraConfiguration;
+        public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly FlashPosAvrRepository _repo;
         private readonly FlashPosAvrMapper _mapper;
         private readonly FlashPosAvrPosProxy _pos;
-        private IMqttClient _mqttClient;
+
         private readonly SemaphoreSlim _semaphoreSlim;
+
+        private readonly FlashPosAvrCameraConfiguration _cameraConfiguration;
+
+        private IMqttClient _mqttClient;
+        private DateTime _lastHearbeat;
 
 
         //for testing
-        public FlashPosAvrProducer(FlashPosAvrProducerConfiguration configuration, IMqttClientMock mock)
+        public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mock)
         {
-            _cameraConfiguration = configuration;
+            _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
             _pos = new FlashPosAvrPosProxy();
@@ -41,19 +47,22 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             mock.UseApplicationMessageReceivedHandler_Mock(async e => await OnUseApplicationMessageReceivedEvent(e));
             _mqttClient = mock;
+
+            _lastHearbeat = DateTime.Now;
         }
 
 
 
-
-        public FlashPosAvrProducer(FlashPosAvrProducerConfiguration configuration)
+        public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera)
         {
-            _cameraConfiguration = configuration;
+            _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
             _pos = new FlashPosAvrPosProxy();
 
             _semaphoreSlim = new SemaphoreSlim(1);
+
+            _lastHearbeat = DateTime.Now;
         }
 
 
@@ -83,6 +92,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
+        public void ReportBlackout()
+        {
+            if (_lastHearbeat < DateTime.Now.AddMinutes(-2))
+                logger.Warn($"Possible camera balckuut.", "Camera Balckout", $"Workstation:{_cameraConfiguration.WorkstationId},LastHB:{_lastHearbeat:HH:mm:ss}");
+        }
+
+
         private async Task CreateProducer()
         {
             // Create a MQTT client factory
@@ -93,7 +109,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             // Create MQTT client options
             var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
+                .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.CameraPort) // MQTT broker address and port
                 //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
                 .WithClientId(_cameraConfiguration.ClientId)
                 .WithCleanSession()
@@ -122,7 +138,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 // Subscribe to a topic
                 await _mqttClient.SubscribeAsync("detection");
-                await _mqttClient.SubscribeAsync("heartbeat");
+                //await _mqttClient.SubscribeAsync("heartbeat");
 
                 // Callback function when a message is received
                 //_mqttClient.ApplicationMessageReceivedHandler = this;
@@ -147,10 +163,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                 if (topic == "detection")
                 {
-                    //ack mqtt
+                    var payload = JsonConvert.DeserializeObject<FVRPayload>(strPayload);
 
-                    CheckInRequest avrData = _mapper.CheckInRequest(
-                        JsonConvert.DeserializeObject<FVRFlashAvrData>(strPayload));
+                    //ack mqtt
+                    await _mqttClient.PublishAsync(_mapper.DetectionAck(payload.eventData.encounterId));
+
+
+                    CheckInRequest avrData = _mapper.CheckInRequest(payload, null);
 
                     //save data to sync ng
                     await _repo.Save(avrData);
@@ -160,7 +179,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 }
                 else if (topic == "heartbeat")
                 {
+                    _lastHearbeat = DateTime.Now;
+
                     //ack
+                    await _mqttClient.PublishAsync(_mapper.HearbeatAck());
                 }
             }
             finally
@@ -170,31 +192,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-
-
-
-        //public virtual async Task HandleApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs data)
-        //{
-        //    await _semaphoreSlim.WaitAsync();
-
-        //    // Convertir el payload a una cadena legible
-        //    var messagePayload = Encoding.UTF8.GetString(data.ApplicationMessage.Payload);
-        //    //Console.WriteLine($"Mensaje recibido en el tema '{e.ApplicationMessage.Topic}': {messagePayload}");
-
-        //    try
-        //    {
-        //        CheckInRequest avrData = _mapper.CheckInRequest(
-        //            JsonConvert.DeserializeObject<FVRFlashAvrData>(messagePayload));
-
-        //        await _repo.Save(avrData);
-
-        //        await _pos.CheckInOutAVR(avrData);
-        //    }
-        //    finally
-        //    {
-        //        _semaphoreSlim.Release();
-        //    }
-        //}
     }
 
 

@@ -8,11 +8,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrConsumer
     {
+        private static SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
+
         private readonly FlashPosAvrRepository _repo;
         private readonly FlashPosAvrNGProxy _ng;
         private readonly FlashPosAvrMapper _mapper;
-        Timer _timer;
-        private readonly SemaphoreSlim _semaphoreSlim;
 
 
         public FlashPosAvrConsumer()
@@ -20,27 +20,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _repo = new FlashPosAvrRepository();
             _ng = new FlashPosAvrNGProxy();
             _mapper = new FlashPosAvrMapper();
-            _semaphoreSlim = new SemaphoreSlim(1);
         }
+
 
         public async Task Start()
         {
-            StartTimer();
         }
 
-        private void StartTimer()
-        {
-            _timer = new Timer(async e => await OnTick(), null, 10000, Timeout.Infinite);
-        }
 
 
         public async Task Stop()
         {
-            await _semaphoreSlim.WaitAsync();
             try
             {
-                if (_timer != null)
-                    _timer.Dispose();
+                await _semaphoreSlim.WaitAsync();
             }
             finally
             {
@@ -49,7 +42,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        private async Task OnTick()
+        public async Task Sync()
         {
             await _semaphoreSlim.WaitAsync();
 
@@ -75,7 +68,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
             finally
             {
-                StartTimer();
                 _semaphoreSlim.Release();
             }
         }

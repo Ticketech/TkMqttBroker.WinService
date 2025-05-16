@@ -72,15 +72,15 @@ namespace TkMqttBroker.WinService.Test.Mockers
         }
 
 
-        public async Task<FVRFlashAvrData> PublishSomething()
+        public async Task<FVRPayload> PublishSomething()
         {
-            var payload = new FVRFlashAvrData
+            var payload = new FVRPayload
             {
-                type = "testo",
+                eventType = "testo",
             };
 
             var data = new MqttApplicationMessageBuilder()
-             .WithTopic("test/topic")
+             .WithTopic("detection")
              .WithPayload(JsonConvert.SerializeObject(payload))
              .WithExactlyOnceQoS()  // QoS 2 para entrega exacta
              .WithRetainFlag()  // Conservar el mensaje en el broker

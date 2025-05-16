@@ -37,13 +37,13 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             var producer = new FlashPosAvrProducer(configuration, mock);
 
-            string clientId = "FlashPosAvr-Test-ClientId";
+            string clientId = $"{TkConfigurationManager.CurrentLocationId}-ClientId";
 
-            MqttApplicationMessage message = new MqttApplicationMessage
-            {
-            };
-            MqttApplicationMessageReceivedEventArgs avrdata = new MqttApplicationMessageReceivedEventArgs(
-                clientId, message);
+            //MqttApplicationMessage message = new MqttApplicationMessage
+            //{
+            //};
+            //MqttApplicationMessageReceivedEventArgs avrdata = new MqttApplicationMessageReceivedEventArgs(
+            //    clientId, message);
 
             string testType = $"{DateTime.Now:yyyyMMddHHmmssffffff}";
 
@@ -53,13 +53,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             {
                 var data = new MqttApplicationMessageBuilder()
                  .WithTopic("detection")
-                 .WithPayload(JsonConvert.SerializeObject(new FVRFlashAvrData
+                 .WithPayload(JsonConvert.SerializeObject(new FVRPayload
                  {
-                     type = testType,
+                     eventType = testType,
                  }))
                  .WithExactlyOnceQoS()  // QoS 2 para entrega exacta
                  .WithRetainFlag()  // Conservar el mensaje en el broker
                  .Build();
+
                 await mock.PublishAsync(data, CancellationToken.None);
             }).Wait();
 

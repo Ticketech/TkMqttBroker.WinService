@@ -137,10 +137,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Brokers\FlashPosAvr\OfficeTest.cs" />
     <Compile Include="Brokers\FlashPosAvr\ProducerTest.cs" />
     <Compile Include="Brokers\FlashPosAvr\ConsumerTest.cs" />
     <Compile Include="Brokers\FlashPosAvr\BrokerTest.cs" />
-    <Compile Include="Brokers\FlashPosAvr\OfficeTest.cs" />
     <Compile Include="Mockers\MqttClientMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Proxies\PosProxy.cs" />

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Tk.Business.Policies;
@@ -17,10 +19,17 @@ using TKDEV = Tk.ConfigurationManager.DevicesConfiguration;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
+
+
     public static class FlashPosAvrPolicy
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private static string _locationId;
+
+
+        public static readonly string SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString();
+        
 
         public static LocationPolicies GetCurrentPolicies()
         {
@@ -59,25 +68,30 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             return new FlashPosAvrProducerConfiguration
             {
                 ClientId = config.BrokerClientId,
-                Port = config.CameraPort,
+                CameraPort = config.CameraPort,
             };
         }
 
 
         public static string LocationId()
         {
-            return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
+            if (_locationId == null)
+            {
+                return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
 select top 1 locationid
 from versions ver, locations loc
 where ver.locationguid = loc.locationguid"
-                );
+                    );
+            }
+
+            return _locationId;
         }
 
 
         //list of camera ips
-        public static List<TKDEV.DeviceConfiguration> GetPosAvrConfigurations()
+        public static List<FlashPosAvrCameraConfiguration> GetCameraConfigurations()
         {
-            List<TKDEV.DeviceConfiguration> configs = new List<TKDEV.DeviceConfiguration>();
+            List<FlashPosAvrCameraConfiguration> configs = new List<FlashPosAvrCameraConfiguration>();
 
             foreach (var workstationId in TkConfigurationManager.GetWorkstations())
             {
@@ -85,12 +99,34 @@ where ver.locationguid = loc.locationguid"
                 {
                     if (device.Type == "AVR" && device.Model == "AVRFlash")
                     {
-                        configs.Add(device);
+                        configs.Add(new FlashPosAvrCameraConfiguration
+                        {
+                            WorkstationId = workstationId,
+                            IP = device.Location,
+                        });
                     }
                 }
             }
 
             return configs;
+        }
+
+
+        //https://stackoverflow.com/questions/6803073/get-local-ip-address
+        public static string GetLocalIPAddress()
+        {
+            string localIp = null;
+
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIp = ip.ToString();
+                }
+            }
+
+            return localIp;
         }
     }
 }
