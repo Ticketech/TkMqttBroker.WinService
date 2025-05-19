@@ -80,13 +80,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Stop()
         {
-            await _semaphoreSlim.WaitAsync();
-
             try
             {
+                await _semaphoreSlim.WaitAsync();
+
                 await _mqttClient.UnsubscribeAsync("detection");
                 await _mqttClient.UnsubscribeAsync("heartbeat");
                 await _mqttClient.DisconnectAsync();
+            }
+            catch (Exception ex)
+            {
+
             }
             finally
             {
@@ -179,7 +183,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     await _repo.Save(avrData);
 
                     //call pos
-                    await _pos.CheckInOutAVR(avrData);
+                    bool res = await _pos.CheckInOutAVR(avrData);
+
+                    //publish result
+                    if (res)
+                        await _mqttClient.PublishAsync(_mapper.ResultAck(payload.eventData.encounterId));
                 }
                 else if (topic == "heartbeat")
                 {

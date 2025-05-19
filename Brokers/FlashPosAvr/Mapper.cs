@@ -6,13 +6,13 @@ using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    internal class FlashPosAvrMapper
+    public class FlashPosAvrMapper
     {
         public FlashPosAvrMapper()
         {
         }
 
-        internal CheckInRequest CheckInRequest(FVRPayload source, string workstationId)
+        public CheckInRequest CheckInRequest(FVRPayload source, string workstationId)
         {
             return new CheckInRequest
             {
@@ -39,36 +39,42 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     headgear = "", //?
                     colour = source.eventData.color,
                     db_match = true, //?
-                    event_timestamp = (long)source.eventDate.ToFileTimeUtc(), //used?
+                    event_timestamp = EpochMiliseconds(source.eventDate)
                 },
             };
         }
 
-        private int PercentageInt(double value)
+        public long EpochMiliseconds(DateTime eventDate)
+        {
+            //https://stackoverflow.com/questions/9453101/how-do-i-get-epoch-time-in-c
+
+            TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+            return (long)t.TotalMilliseconds;
+        }
+
+        public int PercentageInt(double value)
         {
             return Convert.ToInt32(Math.Round(value * 100, 2));
         }
 
-        internal NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest source)
+        public NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest source)
         {
             return new NGPostAvrEntryRawRequest();
         }
 
 
-        internal MqttApplicationMessage DetectionAck(string encounterId)
+        public MqttApplicationMessage DetectionAck(string encounterId)
         {
-            string uid = Guid.NewGuid().ToString();
-
             var ack = new
             {
                 schema_version = 0.01,
-                message_uid = uid,
-                sender_uid = uid,
-                sender_node_type = "FVR",
+                message_uid = Guid.NewGuid().ToString(),
+                sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
+                sender_node_type = FlashPosAvrPolicy.BrokerNodeType(),
                 event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 event_type = "ack",
                 encounter_id = encounterId,
-                client_data = new   /////////////////////////////////////////////////// who is this?
+                client_data = new
                 {
                     ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
                     client_version = FlashPosAvrPolicy.SoftwareVersion,
@@ -98,38 +104,33 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        internal MqttApplicationMessage HearbeatAck()
+        public MqttApplicationMessage HearbeatAck()
         {
-            string uid = Guid.NewGuid().ToString();
-
             var response = new
             {
                 schema_version = 0.01,
-                message_uid = uid,
-                sender_uid = uid,
-                sender_node_type = "FVR",
+                message_uid = Guid.NewGuid().ToString(),
+                sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
+                sender_node_type = FlashPosAvrPolicy.BrokerNodeType(),
                 event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 event_type = "heartbeat",
                 encounter_id = (string)null,
-                client_data = new   /////////////////////////////////////////////////// who is this?
+                client_data = new
                 {
                     ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
                     client_version = FlashPosAvrPolicy.SoftwareVersion,
-                    event_category_id = "9000"
+                    event_category_id = ""
                 },
                 events = new
                 {
-                    event_data = new[]
-                    {
-                        new { _key = "status", _value = "ok" }
-                    }
+                    event_data = new object[0]
                 },
                 payload_data = new
                 {
-                    _payload = "heartbeat ack from client",
+                    _payload = "",
                     _payload_type = "STRING"
                 },
-                event_count = 1,
+                event_count = 0,
                 payload = true
             };
 
@@ -137,6 +138,54 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             return new MqttApplicationMessageBuilder()
                 .WithTopic("heartbeat-ext")
+                .WithPayload(json)
+                .WithExactlyOnceQoS()
+                .WithRetainFlag(false)
+                .Build();
+        }
+
+
+        internal MqttApplicationMessage ResultAck(string encounterId)
+        {
+            var ack = new
+            {
+                schema_version = 0.01,
+                message_uid = Guid.NewGuid().ToString(),
+                sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
+                sender_node_type = FlashPosAvrPolicy.BrokerNodeType(),
+                event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                event_type = "outcome",
+                encounter_id = encounterId,
+                client_data = new
+                {
+                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    client_version = FlashPosAvrPolicy.SoftwareVersion,
+                    event_category_id = ""
+                },
+                events = new
+                {
+                    event_data = new[] 
+                    {
+                        new
+                        {
+                            _key = "",
+                            value = ""
+                        },
+                    }
+                },
+                payload_data = new
+                {
+                    _payload = "",
+                    _payload_type = "STRING"
+                },
+                event_count = 1,
+                payload = false
+            };
+
+            string json = JsonConvert.SerializeObject(ack);
+
+            return new MqttApplicationMessageBuilder()
+                .WithTopic("detection-ext")
                 .WithPayload(json)
                 .WithExactlyOnceQoS()
                 .WithRetainFlag(false)

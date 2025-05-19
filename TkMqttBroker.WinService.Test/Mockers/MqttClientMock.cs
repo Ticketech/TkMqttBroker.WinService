@@ -66,7 +66,8 @@ namespace TkMqttBroker.WinService.Test.Mockers
 
         public async Task<MqttClientPublishResult> PublishAsync(MqttApplicationMessage applicationMessage, CancellationToken cancellationToken)
         {
-            await _useApplicationMessageReceivedHandler.Invoke(new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
+            if (applicationMessage.Topic == "detection")
+                await _useApplicationMessageReceivedHandler.Invoke(new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
 
             return null;
         }
@@ -77,6 +78,10 @@ namespace TkMqttBroker.WinService.Test.Mockers
             var payload = new FVRPayload
             {
                 eventType = "testo",
+                eventData = new FVREventData
+                {
+                    encounterId = Guid.NewGuid().ToString(),
+                },
             };
 
             var data = new MqttApplicationMessageBuilder()

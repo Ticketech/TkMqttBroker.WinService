@@ -25,11 +25,21 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static string _locationId;
-
 
         public static readonly string SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString();
-        
+
+
+        private static string _senderNodeType;
+        public static string BrokerNodeType()
+        {
+            if (_senderNodeType == null)
+            {
+                _senderNodeType = $"tkt:fvr-broker:{TkConfigurationManager.CurrentLocationId}";
+            }
+
+            return _senderNodeType;
+        }
+
 
         public static LocationPolicies GetCurrentPolicies()
         {
@@ -72,19 +82,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public static string LocationId()
-        {
-            if (_locationId == null)
-            {
-                return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
-select top 1 locationid
-from versions ver, locations loc
-where ver.locationguid = loc.locationguid"
-                    );
-            }
+//        public static string LocationId()
+//        {
+//            if (_locationId == null)
+//            {
+//                return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
+//select top 1 locationid
+//from versions ver, locations loc
+//where ver.locationguid = loc.locationguid"
+//                    );
+//            }
 
-            return _locationId;
-        }
+//            return _locationId;
+//        }
 
 
         //list of camera ips

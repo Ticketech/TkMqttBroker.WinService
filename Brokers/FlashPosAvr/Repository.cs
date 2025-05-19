@@ -7,6 +7,7 @@ using System.Data;
 using System.Configuration;
 using Tk.NetTiers.DataAccessLayer;
 using Tk.NetTiers;
+using System.Collections.Generic;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
@@ -64,22 +65,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        //fifo order
-        public async Task<SyncQueues> GetUnsync()
+        //fifo order, only 3 tries
+        public async Task<TList<SyncQueues>> GetUnsync()
         {
-            SyncQueues data = null;
+            TList<SyncQueues> syncList = new TList<SyncQueues>();
 
             await Task.Run(async () =>
             {
                 int count = 0;
-                var sync = DataRepository.SyncQueuesProvider.GetPaged(
-                    $"synqdatatype = '{_dataType}' and synqsyncdate is null", $"timestamp asc", 0, 1, out count);
-
-                if (count > 0)
-                    data = sync[0];
+                syncList = DataRepository.SyncQueuesProvider.GetPaged(
+                    $"synqdatatype = '{_dataType}' and synqsyncdate is null and synqcount < 3", $"timestamp asc", 0, 10, out count);
             });
 
-            return data;
+            return syncList;
         }
 
         internal async Task SetSynced(SyncQueues sync)
@@ -94,6 +92,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }));
         }
 
-     
+
+        internal async Task SetSyncFailed(SyncQueues sync)
+        {
+            await Task.Run((Func<Task>)(async () =>
+            {
+                sync.SynqCount++;
+                //add last sync date???
+
+                sync.EntityState = EntityState.Changed;
+                DataRepository.SyncQueuesProvider.Save(sync);
+            }));
+        }
     }
 }

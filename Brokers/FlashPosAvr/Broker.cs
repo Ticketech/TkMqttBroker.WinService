@@ -27,6 +27,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public FlashPosAvrBroker()
         {
             _mqttClient = null;
+
+            _repo = new FlashPosAvrRepository();
+            _mapper = new FlashPosAvrMapper();
+            _ng = new FlashPosAvrNGProxy();
         }
 
 
@@ -34,6 +38,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public FlashPosAvrBroker(IMqttClientMock mock)
         {
             _mqttClient = mock;
+
+            _repo = new FlashPosAvrRepository();
+            _mapper = new FlashPosAvrMapper();
+            _ng = new FlashPosAvrNGProxy();
         }
 
 
@@ -72,8 +80,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
             try
             {
-                await SyncNG();
-
                 //cameras
                 foreach(var camera in _producers)
                 {
@@ -94,28 +100,38 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
             try
             {
+                await _semaphoreSlim.WaitAsync();
+
                 CheckInRequest avrData = null;
 
-                do
+                var syncList = await _repo.GetUnsync();
+
+                foreach (var sync in syncList)
                 {
-                    var sync = await _repo.GetUnsync();
-
-                    if (sync != null)
+                    try
                     {
-                        //todo: if it fails? 
-
                         avrData = JsonConvert.DeserializeObject<CheckInRequest>(sync.SynqData);
+                        bool res = await _ng.Send(_mapper.NGPostAvrEntryRawRequest(avrData));
 
-                        await _ng.Send(_mapper.NGPostAvrEntryRawRequest(avrData));
-
-                        await _repo.SetSynced(sync);
+                        //todo: if it fails? 
+                        if (res)
+                            await _repo.SetSynced(sync);
+                        else
+                            await _repo.SetSyncFailed(sync);
                     }
+                    catch (Exception ex)
+                    {
 
-                } while (avrData != null);
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
 

@@ -22,7 +22,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             var config = global::TkMqttBroker.WinService.Properties.FlashPosAvr.Default;
 
             _serviceUrl = config.PosServiceUrl;
-            _locationId = FlashPosAvrPolicy.LocationId();
             _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(config.PosApiKey);
         }
 
@@ -36,7 +35,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 using (var client = GetClient())
                 {
-                    string ApiCall = _serviceUrl + $"/api/v2/UltraApi/Locations/{_locationId}/Stays/AVR";
+                    string ApiCall = _serviceUrl + $"/api/v2/UltraApi/Locations/{TkConfigurationManager.CurrentLocationId}/Stays/AVR";
                     var request = new StringContent(JsonConvert.SerializeObject(avrData), Encoding.UTF8, "application/json");
 
                     var response = await client.PostAsync(ApiCall, request);
