@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
@@ -30,6 +31,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly SemaphoreSlim _semaphoreSlim;
 
         private readonly FlashPosAvrCameraConfiguration _cameraConfiguration;
+        private readonly string _clientId;
 
         private IMqttClient _mqttClient;
         private DateTime _lastHearbeat;
@@ -38,6 +40,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         //for testing
         public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mock)
         {
+            _clientId = $"{TkConfigurationManager.CurrentLocationId}-{camera.WorkstationId}-CID";
+
             _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
@@ -109,9 +113,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             // Create MQTT client options
             var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.CameraPort) // MQTT broker address and port
+                .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
                 //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
-                .WithClientId(_cameraConfiguration.ClientId)
+                .WithClientId(_clientId)
                 .WithCleanSession()
                 .WithTls(
                     o =>
@@ -201,7 +205,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-        public FlashPosAvrReader(FlashPosAvrProducerConfiguration configuration)
+        public FlashPosAvrReader(FlashPosAvrCameraConfiguration configuration)
             : base(configuration)
         { }
 

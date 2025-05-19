@@ -32,7 +32,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         {
             //tests publishing is captured by producer and processed accordingly
 
-            FlashPosAvrProducerConfiguration configuration = null;
+            FlashPosAvrCameraConfiguration configuration = null;
             MqttClientMock mock = new MqttClientMock();
 
             var producer = new FlashPosAvrProducer(configuration, mock);

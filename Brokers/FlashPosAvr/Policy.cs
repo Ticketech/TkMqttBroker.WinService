@@ -67,7 +67,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             return new FlashPosAvrProducerConfiguration
             {
-                ClientId = config.BrokerClientId,
                 CameraPort = config.CameraPort,
             };
         }

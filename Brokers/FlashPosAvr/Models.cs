@@ -31,7 +31,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     public class FlashPosAvrProducerConfiguration
     {
-        public int? CameraPort;
+        public int CameraPort;
         public string ClientId;
 
         public FlashPosAvrProducerConfiguration Clone()
@@ -47,6 +47,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         public string WorkstationId;
         public string IP;
+        public int Port;
     }
 
 

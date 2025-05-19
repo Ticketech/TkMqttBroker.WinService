@@ -24,11 +24,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         {
 
             //A. read camera
-            FlashPosAvrProducerConfiguration configuration = new FlashPosAvrProducerConfiguration
+            FlashPosAvrCameraConfiguration configuration = new FlashPosAvrCameraConfiguration
             {
-                ClientId = "FlashPosAvrBroker",
-                IP = "10.30.50.106", // "broker.hivemq.com"
-                CameraPort = 1884,
+                //IP = "10.30.50.106", // "broker.hivemq.com"
+                Port = 1884,
             };
             var reader = new FlashPosAvrReader(configuration);
 

@@ -43,19 +43,37 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("FlashPosBrokerId")]
-        public string BrokerClientId {
+        [global::System.Configuration.DefaultSettingValueAttribute("1884")]
+        public int CameraPort {
             get {
-                return ((string)(this["BrokerClientId"]));
+                return ((int)(this["CameraPort"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int CameraPort {
+        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        public int PlateConfidenceMin {
             get {
-                return ((int)(this["CameraPort"]));
+                return ((int)(this["PlateConfidenceMin"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        public int MakeConfidenceMin {
+            get {
+                return ((int)(this["MakeConfidenceMin"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        public int ColorConfidenceMin {
+            get {
+                return ((int)(this["ColorConfidenceMin"]));
             }
         }
     }

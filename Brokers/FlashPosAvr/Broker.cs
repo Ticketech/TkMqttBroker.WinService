@@ -44,6 +44,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //connect to cameras
             foreach (var cameraConfig in FlashPosAvrPolicy.GetCameraConfigurations())
             {
+                cameraConfig.Port = _configuration.CameraPort;
+
                 FlashPosAvrProducer producer;
                 if (_mqttClient == null)
                     producer = new FlashPosAvrProducer(cameraConfig);
