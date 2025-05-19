@@ -31,7 +31,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly SemaphoreSlim _semaphoreSlim;
 
         private readonly FlashPosAvrCameraConfiguration _cameraConfiguration;
-        private readonly string _clientId;
+        //private readonly string _clientId;
 
         private IMqttClient _mqttClient;
         private DateTime _lastHearbeat;
@@ -40,7 +40,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         //for testing
         public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mock)
         {
-            _clientId = $"{TkConfigurationManager.CurrentLocationId}-{camera.WorkstationId}-CID";
+            //_clientId = $"{TkConfigurationManager.CurrentLocationId}-{camera.WorkstationId}-CID";
 
             _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
@@ -119,7 +119,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             var options = new MqttClientOptionsBuilder()
                 .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
                 //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
-                .WithClientId(_clientId)
+                .WithClientId(FlashPosAvrPolicy.BrokerClientId()) //(_clientId)
                 .WithCleanSession()
                 .WithTls(
                     o =>
@@ -180,7 +180,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     CheckInRequest avrData = _mapper.CheckInRequest(payload, null);
 
                     //save data to sync ng
-                    await _repo.Save(avrData);
+                    await _repo.Add(avrData);
 
                     //call pos
                     bool res = await _pos.CheckInOutAVR(avrData);

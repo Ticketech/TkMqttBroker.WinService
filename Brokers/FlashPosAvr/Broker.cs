@@ -80,6 +80,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
             try
             {
+                _timer.Dispose();
+
                 //cameras
                 foreach(var camera in _producers)
                 {

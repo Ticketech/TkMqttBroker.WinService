@@ -73,7 +73,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
         }
 
 
-        public async Task<FVRPayload> PublishSomething()
+        public async Task<FVRPayload> PublishDetection()
         {
             var payload = new FVRPayload
             {

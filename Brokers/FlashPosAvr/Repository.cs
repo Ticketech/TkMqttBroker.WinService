@@ -31,7 +31,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public async Task Save(CheckInRequest data)
+        public async Task Add(CheckInRequest data)
         {
             await Task.Run((Func<Task>)(async () =>
             {
@@ -42,7 +42,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     SynqCount = 0,
                     SynqData = JsonConvert.SerializeObject(data),
                     SynqDataType = _dataType,
-                    SynqSyncDate = currentTime,
+                    SynqSyncDate = null,
                     SoftwareVersion = _softwareVersion,
                     Timestamp = currentTime,
                 };
@@ -85,7 +85,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             await Task.Run((Func<Task>)(async () =>
             {
                 sync.SynqSyncDate = await this.GetServerTime();
-                sync.SynqCount++;
+                sync.SynqCount += 1;
 
                 sync.EntityState = EntityState.Changed;
                 DataRepository.SyncQueuesProvider.Save(sync);

@@ -79,7 +79,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.Timeout = new TimeSpan(0, 1, 0);
+            client.Timeout = new TimeSpan(0, 0, 5);
 
             return client;
         }

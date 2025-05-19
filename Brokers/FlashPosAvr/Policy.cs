@@ -30,7 +30,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         private static string _senderNodeType;
-        public static string BrokerNodeType()
+        public static string BrokerClientId()
         {
             if (_senderNodeType == null)
             {

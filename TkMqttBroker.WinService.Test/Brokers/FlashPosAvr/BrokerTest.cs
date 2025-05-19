@@ -40,7 +40,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             {
                 await broker.Start();
 
-                FVRPayload data = await mqttClient.PublishSomething();
+                FVRPayload data = await mqttClient.PublishDetection();
 
                 Thread.Sleep(30000);
 
@@ -50,6 +50,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             var sync = Proxies.PosProxy.SyncQueue.GetLatest();
 
             Assert.IsNotNull(sync.SynqSyncDate);
+            Assert.AreEqual(sync.SynqCount, 1);
         }
     }
 }
