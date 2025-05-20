@@ -12,7 +12,7 @@ using Tk.ConfigurationManager;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class FlashPosAvrNGProxy
+    public class FlashPosAvrNGProxy: INGProxy
     {
         private string _serviceUrl;
         private string _apiKey;

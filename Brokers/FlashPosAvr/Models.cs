@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tk.ConfigurationManager.DevicesConfiguration;
+using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
@@ -21,6 +22,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //    public string Username;
 
     //}
+
+    public interface IPosProxy
+    {
+        Task<bool> CheckInOutAVR(CheckInRequest avrData);
+
+    }
+
+    public interface INGProxy
+    {
+        Task<bool> Send(NGPostAvrEntryRawRequest data);
+    }
 
     //mock mqtt client
     public interface IMqttClientMock: IMqttClient

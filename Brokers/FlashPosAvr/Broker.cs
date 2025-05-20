@@ -15,7 +15,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private readonly IMqttClient _mqttClient;
         private readonly FlashPosAvrRepository _repo;
-        private readonly FlashPosAvrNGProxy _ng;
+        private readonly INGProxy _ng;
+        private readonly IPosProxy _pos;
         private readonly FlashPosAvrMapper _mapper;
 
         private List<FlashPosAvrProducer> _producers = new List<FlashPosAvrProducer>();
@@ -35,13 +36,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashPosAvrBroker(IMqttClientMock mock)
+        public FlashPosAvrBroker(IMqttClientMock mqttMock, IPosProxy posMock, INGProxy ngMock)
         {
-            _mqttClient = mock;
+            _mqttClient = mqttMock;
 
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
-            _ng = new FlashPosAvrNGProxy();
+            _ng = ngMock;
+            _pos = posMock;
         }
 
 
@@ -58,7 +60,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 if (_mqttClient == null)
                     producer = new FlashPosAvrProducer(cameraConfig);
                 else
-                    producer = new FlashPosAvrProducer(cameraConfig, _mqttClient as IMqttClientMock);
+                    producer = new FlashPosAvrProducer(cameraConfig, _mqttClient as IMqttClientMock, _pos);
 
                 _producers.Add(producer);
 

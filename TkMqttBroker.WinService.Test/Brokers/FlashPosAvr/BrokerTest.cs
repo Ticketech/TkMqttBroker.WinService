@@ -29,9 +29,11 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         [TestMethod]
         public void TestBroker()
         {
-            //A.
+            //A. all ok
             var mqttClient = new MqttClientMock();
-            var broker = new FlashPosAvrBroker(mqttClient);
+            var pos = new PosProxyMock(true);
+            var ng = new NGProxyMock(true);
+            var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
             PosProxy.Workstations.AddAVRFlash();
@@ -42,7 +44,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
                 FVRPayload data = await mqttClient.PublishDetection();
 
-                Thread.Sleep(30000);
+                Thread.Sleep(20000);
 
                 await broker.Stop();
             }).Wait();

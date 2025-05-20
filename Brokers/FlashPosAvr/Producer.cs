@@ -26,7 +26,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private readonly FlashPosAvrRepository _repo;
         private readonly FlashPosAvrMapper _mapper;
-        private readonly FlashPosAvrPosProxy _pos;
+        private readonly IPosProxy _pos;
 
         private readonly SemaphoreSlim _semaphoreSlim;
 
@@ -38,19 +38,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mock)
+        public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mqttMock, IPosProxy posMock)
         {
             //_clientId = $"{TkConfigurationManager.CurrentLocationId}-{camera.WorkstationId}-CID";
 
             _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
-            _pos = new FlashPosAvrPosProxy();
+            _pos = posMock;
 
             _semaphoreSlim = new SemaphoreSlim(1);
 
-            mock.UseApplicationMessageReceivedHandler_Mock(async e => await OnUseApplicationMessageReceivedEvent(e));
-            _mqttClient = mock;
+            mqttMock.UseApplicationMessageReceivedHandler_Mock(async e => await OnUseApplicationMessageReceivedEvent(e));
+            _mqttClient = mqttMock;
 
             _lastHearbeat = DateTime.Now;
         }

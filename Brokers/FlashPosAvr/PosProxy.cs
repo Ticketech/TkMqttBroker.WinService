@@ -11,10 +11,9 @@ using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class FlashPosAvrPosProxy
+    public class FlashPosAvrPosProxy : IPosProxy
     {
         private readonly string _serviceUrl;
-        private readonly string _locationId;
         private readonly string _apiKey;
 
         public FlashPosAvrPosProxy()
