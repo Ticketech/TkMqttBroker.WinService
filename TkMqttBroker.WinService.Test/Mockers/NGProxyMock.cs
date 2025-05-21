@@ -10,7 +10,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
 {
     public class NGProxyMock : INGProxy
     {
-        private readonly bool _sendRes;
+        private bool _sendRes;
 
         public NGProxyMock(bool sendRes)
         {
@@ -26,6 +26,11 @@ namespace TkMqttBroker.WinService.Test.Mockers
             });
 
             return _sendRes;
+        }
+
+        public void SetSendResult(bool sendRes)
+        {
+            _sendRes = sendRes;
         }
     }
 }
