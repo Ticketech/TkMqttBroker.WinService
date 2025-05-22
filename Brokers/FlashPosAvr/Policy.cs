@@ -106,21 +106,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        //        public static string LocationId()
-        //        {
-        //            if (_locationId == null)
-        //            {
-        //                return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
-        //select top 1 locationid
-        //from versions ver, locations loc
-        //where ver.locationguid = loc.locationguid"
-        //                    );
-        //            }
-
-        //            return _locationId;
-        //        }
-
-
         //list of camera ips
         public static List<FlashPosAvrCameraConfiguration> GetCameraConfigurations()
         {

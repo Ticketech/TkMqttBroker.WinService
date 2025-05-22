@@ -177,7 +177,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     //ack mqtt
                     await _mqttClient.PublishAsync(_mapper.DetectionAck(payload.eventData.encounterId));
 
-                    CheckInRequest avrData = _mapper.CheckInRequest(payload, null);
+                    CheckInRequest avrData = _mapper.CheckInRequest(payload, _cameraConfiguration);
 
                     //save data to sync ng
                     await _repo.Add(avrData);

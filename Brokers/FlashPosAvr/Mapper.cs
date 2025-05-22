@@ -26,7 +26,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 {
                     camera_id = source.deviceMxId,
                     confidence = PercentageInt(source.eventData.licensePlateConfidence),
-                    direction = "no idea", //direction??
+                    direction = workstation.Direction.ToString(),
                     location_id = TkConfigurationManager.CurrentLocationId,
                     plate = $"{source.eventData.licensePlate} : {workstation.Direction} : Duration : 0hr 0m 0s",
                     workstation_id = workstation.WorkstationId,

@@ -37,7 +37,7 @@ and ConfigurationTypeCode = 0;"
 
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 update LocationsMachinesConfigurations
-set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" quality=""50"" location=""192.168.1.10"" /></posDevices>'
+set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" location=""192.168.1.10"" spoolerPrefix=""entry"" /></posDevices>'
 where MachineName = 'flash077' and LocationMachineConfigurationSection = 'posdevices'"
 );
             }
