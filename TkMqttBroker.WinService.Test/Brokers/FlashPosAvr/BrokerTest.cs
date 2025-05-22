@@ -88,7 +88,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
 
-            //A. ng fails
+            //A. ng fails, then ok
             mqttClient = new MqttClientMock();
             pos = new PosProxyMock(true);
             ng = new NGProxyMock(false);

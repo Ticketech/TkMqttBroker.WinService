@@ -52,7 +52,7 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
         public int PlateConfidenceMin {
             get {
                 return ((int)(this["PlateConfidenceMin"]));
@@ -61,7 +61,7 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
         public int MakeConfidenceMin {
             get {
                 return ((int)(this["MakeConfidenceMin"]));
@@ -70,10 +70,19 @@ namespace TkMqttBroker.WinService.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
         public int ColorConfidenceMin {
             get {
                 return ((int)(this["ColorConfidenceMin"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        public int StateConfidenceMin {
+            get {
+                return ((int)(this["StateConfidenceMin"]));
             }
         }
     }

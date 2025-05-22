@@ -41,17 +41,29 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     }
 
 
-    public class FlashPosAvrProducerConfiguration
+    public class FlashPosAvrBrokerConfiguration
     {
         public int CameraPort;
         public string ClientId;
+        public int ColorConfidenceMin;
+        public int MakeConfidenceMin;
+        public int PlateConfidenceMin;
+        public int StateConfidenceMin;
+        public string DefaultStateCode;
+        public string SoftwareVersion;
 
-        public FlashPosAvrProducerConfiguration Clone()
+        public FlashPosAvrBrokerConfiguration Clone()
         {
-            var clone = (FlashPosAvrProducerConfiguration)this.MemberwiseClone();
+            var clone = (FlashPosAvrBrokerConfiguration)this.MemberwiseClone();
 
             return clone;
         }
+    }
+
+    public enum FPADirection
+    {
+        ENTRY,
+        EXIT
     }
 
 
@@ -60,6 +72,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string WorkstationId;
         public string IP;
         public int Port;
+        public FPADirection Direction;
     }
 
 

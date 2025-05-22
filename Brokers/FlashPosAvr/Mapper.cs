@@ -1,6 +1,7 @@
 ﻿using MQTTnet;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Specialized;
 using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
 
@@ -8,11 +9,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrMapper
     {
+        private readonly FlashPosAvrBrokerConfiguration _config;
+
+
         public FlashPosAvrMapper()
         {
+            _config = FlashPosAvrPolicy.BrokerPolicies;
         }
 
-        public CheckInRequest CheckInRequest(FVRPayload source, string workstationId)
+
+        public CheckInRequest CheckInRequest(FVRPayload source, FlashPosAvrCameraConfiguration workstation)
         {
             return new CheckInRequest
             {
@@ -22,12 +28,12 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     confidence = PercentageInt(source.eventData.licensePlateConfidence),
                     direction = "no idea", //direction??
                     location_id = TkConfigurationManager.CurrentLocationId,
-                    plate = $"{source.eventData.licensePlate} : EXIT : Duration : 1hr 7m 22s", //duration??
-                    workstation_id = workstationId,
-                    workstation_name = workstationId,
+                    plate = $"{source.eventData.licensePlate} : {workstation.Direction} : Duration : 0hr 0m 0s",
+                    workstation_id = workstation.WorkstationId,
+                    workstation_name = workstation.WorkstationId,
                     id = source.eventId,
                     lane_id = Convert.ToInt32(source.eventData.laneId), //must be a number!
-                    make = source.eventData.make,
+                    make = CheckInRequestMake(source.eventData),
               
                     full_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_0.jpg",
                     cropped_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_1.jpg",
@@ -37,12 +43,47 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     longitude = 0,
                     vehicle_category = source.eventData.type,
                     headgear = "", //?
-                    colour = source.eventData.color,
+                    colour = CheckInRequestColor(source.eventData),
                     db_match = true, //?
-                    event_timestamp = EpochMiliseconds(source.eventDate)
+                    event_timestamp = EpochMiliseconds(source.eventDate),
+                    region = CheckInRequestRegion(source.eventData)
                 },
             };
         }
+
+
+        public string CheckInRequestMake(FVREventData eventData)
+        {
+            if (eventData.makeConfidence < _config.MakeConfidenceMin)
+                return "OTHER";
+            else
+                return eventData.make;
+        }
+
+
+        public string CheckInRequestColor(FVREventData eventData)
+        {
+            if (eventData.colorConfidence < _config.ColorConfidenceMin)
+                return "OTHER";
+            else
+                return eventData.color;
+        }
+
+
+        public string CheckInRequestRegion(FVREventData eventData)
+        {
+            if (eventData.stateConfidence < _config.StateConfidenceMin)
+                return $"us-{_config.DefaultStateCode}".ToLower();
+            else
+            {
+                string code = FlashPosAvrPolicy.StateCode(eventData.state);
+                if (code == null)
+                    return $"us-{_config.DefaultStateCode}".ToLower();
+                else
+                    return $"us-{FlashPosAvrPolicy.StateCode(eventData.state)}".ToLower();
+            }
+        }
+
 
         public long EpochMiliseconds(DateTime eventDate)
         {
@@ -70,14 +111,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 schema_version = 0.01,
                 message_uid = Guid.NewGuid().ToString(),
                 sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
-                sender_node_type = FlashPosAvrPolicy.BrokerClientId(),
+                sender_node_type = _config.ClientId,
                 event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 event_type = "ack",
                 encounter_id = encounterId,
                 client_data = new
                 {
                     ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
-                    client_version = FlashPosAvrPolicy.SoftwareVersion,
+                    client_version = _config.SoftwareVersion,
                     event_category_id = ""
                 },
                 events = new
@@ -111,14 +152,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 schema_version = 0.01,
                 message_uid = Guid.NewGuid().ToString(),
                 sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
-                sender_node_type = FlashPosAvrPolicy.BrokerClientId(),
+                sender_node_type = _config.ClientId,
                 event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 event_type = "heartbeat",
                 encounter_id = (string)null,
                 client_data = new
                 {
                     ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
-                    client_version = FlashPosAvrPolicy.SoftwareVersion,
+                    client_version = _config.SoftwareVersion,
                     event_category_id = ""
                 },
                 events = new
@@ -152,14 +193,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 schema_version = 0.01,
                 message_uid = Guid.NewGuid().ToString(),
                 sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
-                sender_node_type = FlashPosAvrPolicy.BrokerClientId(),
+                sender_node_type = _config.ClientId,
                 event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 event_type = "outcome",
                 encounter_id = encounterId,
                 client_data = new
                 {
                     ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
-                    client_version = FlashPosAvrPolicy.SoftwareVersion,
+                    client_version = _config.SoftwareVersion,
                     event_category_id = ""
                 },
                 events = new

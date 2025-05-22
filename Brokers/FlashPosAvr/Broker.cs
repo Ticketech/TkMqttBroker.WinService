@@ -20,7 +20,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly FlashPosAvrMapper _mapper;
 
         private List<FlashPosAvrProducer> _producers = new List<FlashPosAvrProducer>();
-        private FlashPosAvrProducerConfiguration _configuration;
+        private FlashPosAvrBrokerConfiguration _configuration;
 
         Timer _timer;
 
@@ -49,7 +49,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Start()
         {
-            _configuration = FlashPosAvrPolicy.GetBrokerConfiguration();
+            _configuration = FlashPosAvrPolicy.GetBrokerPolicies();
 
             //connect to cameras
             foreach (var cameraConfig in FlashPosAvrPolicy.GetCameraConfigurations())

@@ -12,13 +12,16 @@
       <Value Profile="(Default)">1884</Value>
     </Setting>
     <Setting Name="PlateConfidenceMin" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">90</Value>
+      <Value Profile="(Default)">80</Value>
     </Setting>
     <Setting Name="MakeConfidenceMin" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">90</Value>
+      <Value Profile="(Default)">80</Value>
     </Setting>
     <Setting Name="ColorConfidenceMin" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">90</Value>
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="StateConfidenceMin" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">80</Value>
     </Setting>
   </Settings>
 </SettingsFile>

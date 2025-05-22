@@ -25,23 +25,23 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private static readonly FlashPosAvrBrokerConfiguration _brokerPolicies;
 
-        public static readonly string SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString();
 
 
-        private static string _senderNodeType;
-        public static string BrokerClientId()
+        static FlashPosAvrPolicy()
         {
-            if (_senderNodeType == null)
-            {
-                _senderNodeType = $"tkt:fvr-broker:{TkConfigurationManager.CurrentLocationId}";
-            }
-
-            return _senderNodeType;
+            _brokerPolicies = GetBrokerPolicies();
         }
 
 
-        public static LocationPolicies GetCurrentPolicies()
+        public static FlashPosAvrBrokerConfiguration BrokerPolicies
+        {
+            get { return (FlashPosAvrBrokerConfiguration)_brokerPolicies.Clone(); }
+        }
+
+
+        public static LocationPolicies GetPosPolicies()
         {
             
             int count = 0;
@@ -71,30 +71,54 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public static FlashPosAvrProducerConfiguration GetBrokerConfiguration()
+        public static FlashPosAvrBrokerConfiguration GetBrokerPolicies()
         {
             var config = global::TkMqttBroker.WinService.Properties.FlashPosAvr.Default;
 
-            return new FlashPosAvrProducerConfiguration
+            var policy = new FlashPosAvrBrokerConfiguration
             {
                 CameraPort = config.CameraPort,
-            };
+
+                ColorConfidenceMin = config.ColorConfidenceMin,
+                MakeConfidenceMin = config.MakeConfidenceMin,
+                PlateConfidenceMin = config.PlateConfidenceMin,
+                StateConfidenceMin = config.StateConfidenceMin,
+
+                ClientId = $"tkt:fvr-broker:{TkConfigurationManager.CurrentLocationId}",
+
+                SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString(),
+        };
+
+            var pospolicy = GetPosPolicies();
+
+            var state = DataRepository.StatesProvider.GetByStateGUID(pospolicy.Data.StateGUID);
+            policy.DefaultStateCode = state.StateCode;
+
+            return policy;
         }
 
 
-//        public static string LocationId()
-//        {
-//            if (_locationId == null)
-//            {
-//                return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
-//select top 1 locationid
-//from versions ver, locations loc
-//where ver.locationguid = loc.locationguid"
-//                    );
-//            }
+        public static string StateCode(string name)
+        {
+            var state = DataRepository.StatesProvider.GetByStateName(name);
 
-//            return _locationId;
-//        }
+            return state?.StateCode;
+        }
+
+
+        //        public static string LocationId()
+        //        {
+        //            if (_locationId == null)
+        //            {
+        //                return (string)DataRepository.Provider.ExecuteScalar(CommandType.Text, $@"
+        //select top 1 locationid
+        //from versions ver, locations loc
+        //where ver.locationguid = loc.locationguid"
+        //                    );
+        //            }
+
+        //            return _locationId;
+        //        }
 
 
         //list of camera ips
@@ -112,6 +136,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         {
                             WorkstationId = workstationId,
                             IP = device.Location,
+                            Direction = (FPADirection)Enum.Parse(typeof(FPADirection), device.SpoolerPrefix.ToUpper()), //entry or exit
                         });
                     }
                 }

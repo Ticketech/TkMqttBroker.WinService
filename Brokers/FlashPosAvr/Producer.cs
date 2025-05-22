@@ -30,6 +30,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private readonly SemaphoreSlim _semaphoreSlim;
 
+        private readonly FlashPosAvrBrokerConfiguration _brokerConfig;
         private readonly FlashPosAvrCameraConfiguration _cameraConfiguration;
         //private readonly string _clientId;
 
@@ -40,7 +41,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         //for testing
         public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mqttMock, IPosProxy posMock)
         {
-            //_clientId = $"{TkConfigurationManager.CurrentLocationId}-{camera.WorkstationId}-CID";
+            _brokerConfig = FlashPosAvrPolicy.BrokerPolicies;
 
             _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
@@ -119,7 +120,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             var options = new MqttClientOptionsBuilder()
                 .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
                 //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
-                .WithClientId(FlashPosAvrPolicy.BrokerClientId()) //(_clientId)
+                .WithClientId(_brokerConfig.ClientId) //(_clientId)
                 .WithCleanSession()
                 .WithTls(
                     o =>
@@ -175,7 +176,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                     //ack mqtt
                     await _mqttClient.PublishAsync(_mapper.DetectionAck(payload.eventData.encounterId));
-
 
                     CheckInRequest avrData = _mapper.CheckInRequest(payload, null);
 
