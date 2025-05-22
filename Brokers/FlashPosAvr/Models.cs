@@ -51,6 +51,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string DefaultStateCode;
         public string SoftwareVersion;
 
+        public string NGServiceUrl { get; set; }
+        public string NGApiKey { get; set; }
+
         public FlashPosAvrBrokerConfiguration Clone()
         {
             var clone = (FlashPosAvrBrokerConfiguration)this.MemberwiseClone();

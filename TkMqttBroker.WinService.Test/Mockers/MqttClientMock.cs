@@ -32,7 +32,6 @@ namespace TkMqttBroker.WinService.Test.Mockers
         public IMqttClientDisconnectedHandler DisconnectedHandler { get; set;}
         public IMqttApplicationMessageReceivedHandler ApplicationMessageReceivedHandler { get; set; }
 
-
         public Func<MqttApplicationMessageReceivedEventArgs, Task> OnUseApplicationMessageReceivedEventAsync;
         private Func<MqttApplicationMessageReceivedEventArgs, Task> _useApplicationMessageReceivedHandler;
 
@@ -67,10 +66,23 @@ namespace TkMqttBroker.WinService.Test.Mockers
         public async Task<MqttClientPublishResult> PublishAsync(MqttApplicationMessage applicationMessage, CancellationToken cancellationToken)
         {
             if (applicationMessage.Topic == "detection")
+            {
                 await _useApplicationMessageReceivedHandler.Invoke(new MqttApplicationMessageReceivedEventArgs("123", applicationMessage));
+            }
+            else if (applicationMessage.Topic == "detection-ext")
+            {
+                string payload = applicationMessage.ConvertPayloadToString();
+                if (payload.Contains("ack"))
+                    LastAck = payload;
+                else if (payload.Contains("outcome"))
+                    LastOutcome = payload;
+            }
 
             return null;
         }
+
+        public string LastOutcome { get; set; }
+        public string LastAck { get; set; }
 
 
         public async Task<FVRPayload> PublishDetection()
@@ -106,6 +118,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
             return null;
         }
 
+
         public async Task<MqttClientUnsubscribeResult> UnsubscribeAsync(MqttClientUnsubscribeOptions options, CancellationToken cancellationToken)
         {
             return null;
@@ -115,6 +128,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
         {
             _useApplicationMessageReceivedHandler = handler;
         }
+
     }
 
 

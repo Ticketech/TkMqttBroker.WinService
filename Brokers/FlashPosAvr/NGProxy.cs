@@ -14,9 +14,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrNGProxy: INGProxy
     {
-        private string _serviceUrl;
-        private string _apiKey;
+        private readonly FlashPosAvrBrokerConfiguration _config;
 
+
+        public FlashPosAvrNGProxy()
+        {
+            _config = FlashPosAvrPolicy.BrokerPolicies;
+        }
 
 
         public async Task<bool> Send(NGPostAvrEntryRawRequest data)
@@ -27,7 +31,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 using (var client = GetClient())
                 {
-                    string ApiCall = _serviceUrl + $"/api/core/avr/entry/raw";
+                    string ApiCall = _config.NGServiceUrl + $"/api/core/avr/entry/raw";
                     var request = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 
                     var response = await client.PostAsync(ApiCall, request);
@@ -54,16 +58,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private HttpClient GetClient()
         {
-            //config
-            if (_serviceUrl == null || _apiKey == null)
-            {
-                var policy = FlashPosAvrPolicy.GetPosPolicies();
-
-                _serviceUrl = policy.TicketechNG.NGService.ServiceUrl.Value;
-                _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(policy.TicketechNG.CoreApiKey.Value);
-            }
-
-
             //http client
             var handler = new HttpClientHandler();
 
@@ -76,7 +70,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             var client = new HttpClient(handler);
 
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_config.NGApiKey}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.Timeout = new TimeSpan(0, 0, 5);

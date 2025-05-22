@@ -60,6 +60,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera)
         {
+            _brokerConfig = FlashPosAvrPolicy.BrokerPolicies;
+
             _cameraConfiguration = camera;
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();

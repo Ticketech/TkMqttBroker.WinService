@@ -84,15 +84,18 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 PlateConfidenceMin = config.PlateConfidenceMin,
                 StateConfidenceMin = config.StateConfidenceMin,
 
-                ClientId = $"tkt:fvr-broker:{TkConfigurationManager.CurrentLocationId}",
+                ClientId = $"tkt:fpa-broker:{TkConfigurationManager.CurrentLocationId}",
 
                 SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString(),
-        };
+            };
 
             var pospolicy = GetPosPolicies();
 
             var state = DataRepository.StatesProvider.GetByStateGUID(pospolicy.Data.StateGUID);
             policy.DefaultStateCode = state.StateCode;
+
+            policy.NGServiceUrl = pospolicy.TicketechNG.NGService.ServiceUrl.Value;
+            policy.NGApiKey = ConfigurationDecrypter.DecryptValueWithHeader(pospolicy.TicketechNG.CoreApiKey.Value);
 
             return policy;
         }
