@@ -161,6 +161,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         protected virtual async Task OnUseApplicationMessageReceivedEvent(MqttApplicationMessageReceivedEventArgs e)
         {
             //todo: respond to all events
+            const string method = "POS.Rest.CheckInOutAVR";
 
             try
             {
@@ -182,12 +183,25 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     //save data to sync ng
                     await _repo.Add(avrData);
 
-                    //call pos
-                    bool res = await _pos.CheckInOutAVR(avrData);
+                    //check confidence
+                    if (avrData.infoplate.confidence >= _brokerConfig.PlateConfidenceMin)
+                    {
+                        //call pos
+                        var res = await _pos.CheckInOutAVR(avrData);
 
-                    //publish result
-                    if (res)
-                        await _mqttClient.PublishAsync(_mapper.ResultAck(payload.eventData.encounterId));
+                        //publish result
+                        if (res.code == 0)
+                        {
+                            if (res.stay.checkout_time == null) //checkin
+                                await _mqttClient.PublishAsync(_mapper.CheckInConsume(payload.eventData.encounterId, method, res.stay));
+                            else //checkout
+                                await _mqttClient.PublishAsync(_mapper.CheckoutConsume(payload.eventData.encounterId, method, res.stay));
+                        }
+                        else
+                            await _mqttClient.PublishAsync(_mapper.CheckFailedConsume(payload.eventData.encounterId, method));
+                    }
+                    else
+                        await _mqttClient.PublishAsync(_mapper.NoConfidenceConsume(payload.eventData.encounterId, method));
                 }
                 else if (topic == "heartbeat")
                 {

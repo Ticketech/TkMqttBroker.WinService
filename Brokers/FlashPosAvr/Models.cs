@@ -25,8 +25,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     public interface IPosProxy
     {
-        Task<bool> CheckInOutAVR(CheckInRequest avrData);
-
+        Task<CheckInResponse> CheckInOutAVR(CheckInRequest avrData);
     }
 
     public interface INGProxy

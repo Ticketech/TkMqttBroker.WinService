@@ -19,14 +19,23 @@ namespace TkMqttBroker.WinService.Test.Mockers
         }
 
 
-        public async Task<bool> CheckInOutAVR(CheckInRequest avrData)
+        public async Task<CheckInResponse> CheckInOutAVR(CheckInRequest avrData)
         {
             await Task.Run(async () =>
             {
                 Thread.Sleep(3000);
             });
 
-            return _checkinoutavrRes;
+            return new CheckInResponse
+            {
+                code = _checkinoutavrRes? 0 : -1,
+                stay = new StayInfo
+                {
+
+                }
+            };
         }
+
+     
     }
 }

@@ -186,9 +186,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        internal MqttApplicationMessage ResultAck(string encounterId)
+        public MqttApplicationMessage CheckFailedConsume(string encounterId, string method)
         {
-            var ack = new
+            var outcome = new
             {
                 schema_version = 0.01,
                 message_uid = Guid.NewGuid().ToString(),
@@ -197,40 +197,197 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 event_type = "outcome",
                 encounter_id = encounterId,
+
                 client_data = new
                 {
                     ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
                     client_version = _config.SoftwareVersion,
-                    event_category_id = ""
+                    event_category_id = "7922"
                 },
+
                 events = new
                 {
-                    event_data = new[] 
-                    {
-                        new
-                        {
-                            _key = "",
-                            value = ""
-                        },
+                    event_data = new[]
+                     {
+                         new { _key = "method", _value = method },
+                         new { _key = "eventDescription", _value = $"Received by POS--check in/out failed" }
                     }
                 },
+
                 payload_data = new
                 {
                     _payload = "",
                     _payload_type = "STRING"
                 },
-                event_count = 1,
-                payload = false
-            };
 
-            string json = JsonConvert.SerializeObject(ack);
+                event_count = 2,
+                payload = false
+            }; string json = JsonConvert.SerializeObject(outcome, Formatting.Indented);
+
+            //Console.WriteLine("Mensaje Outcome MQTT:\n" + json); 
 
             return new MqttApplicationMessageBuilder()
-                .WithTopic("detection-ext")
-                .WithPayload(json)
-                .WithExactlyOnceQoS()
-                .WithRetainFlag(false)
-                .Build();
+            .WithTopic("detection-ext")
+            .WithPayload(json)
+            .WithExactlyOnceQoS()
+            .WithRetainFlag(false)
+            .Build();
+        }
+    
+
+
+        internal MqttApplicationMessage CheckInConsume(string encounterId, string method, StayInfo data)
+        {
+            var outcome = new
+            {
+                schema_version = 0.01,
+                message_uid = Guid.NewGuid().ToString(),
+                sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
+                sender_node_type = _config.ClientId,
+                event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                event_type = "outcome",
+                encounter_id = encounterId,
+
+                client_data = new
+                {
+                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    client_version = _config.SoftwareVersion,
+                    event_category_id = "7922"
+                },
+                
+                events = new
+                {
+                    event_data = new[]
+                    {
+                         new { _key = "method", _value = method },
+                         new { _key = "ticketId", _value = data.stay_guid.ToString() },
+                         new { _key = "ticketNumber", _value = data.ticket_number.ToString() },
+                         new { _key = "ticketType", _value = $"{data.stay_type},Ticketech" },
+                         new { _key = "ticketTrigger", _value = "CheckIn" },
+                         new { _key = "plate", _value = data.plate },
+                         new { _key = "eventDescription", _value = $"Check-In Ticket #{data.ticket_number} Tag {data.tag_number}" }
+                    }
+                },
+
+                payload_data = new
+                {
+                    _payload = "",
+                    _payload_type = "STRING"
+                },
+
+                event_count = 7,
+                payload = false
+            }; string json = JsonConvert.SerializeObject(outcome, Formatting.Indented);
+
+            //Console.WriteLine("Mensaje Outcome MQTT:\n" + json); 
+            
+            return new MqttApplicationMessageBuilder()
+            .WithTopic("detection-ext")
+            .WithPayload(json)
+            .WithExactlyOnceQoS()
+            .WithRetainFlag(false)
+            .Build();
+        }
+
+        internal MqttApplicationMessage CheckoutConsume(string encounterId, string method, StayInfo data)
+        {
+            var outcome = new
+            {
+                schema_version = 0.01,
+                message_uid = Guid.NewGuid().ToString(),
+                sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
+                sender_node_type = _config.ClientId,
+                event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                event_type = "outcome",
+                encounter_id = encounterId,
+
+                client_data = new
+                {
+                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    client_version = _config.SoftwareVersion,
+                    event_category_id = "7922"
+                },
+
+                events = new
+                {
+                    event_data = new[]
+                   {
+                         new { _key = "method", _value = method },
+                         new { _key = "ticketId", _value = data.stay_guid.ToString() },
+                         new { _key = "ticketNumber", _value = data.ticket_number.ToString() },
+                         new { _key = "ticketType", _value = $"{data.stay_type},Ticketech" },
+                         new { _key = "ticketTrigger", _value = "CheckOut" },
+                         new { _key = "plate", _value = data.plate },
+                         new { _key = "eventDescription", _value = $"Check-Out Ticket #{data.ticket_number}" }
+                    }
+                },
+
+                payload_data = new
+                {
+                    _payload = "",
+                    _payload_type = "STRING"
+                },
+
+                event_count = 7,
+                payload = false
+            }; string json = JsonConvert.SerializeObject(outcome, Formatting.Indented);
+
+            //Console.WriteLine("Mensaje Outcome MQTT:\n" + json); 
+
+            return new MqttApplicationMessageBuilder()
+            .WithTopic("detection-ext")
+            .WithPayload(json)
+            .WithExactlyOnceQoS()
+            .WithRetainFlag(false)
+            .Build();
+        }
+
+        internal MqttApplicationMessage NoConfidenceConsume(string encounterId, string method)
+        {
+            var outcome = new
+            {
+                schema_version = 0.01,
+                message_uid = Guid.NewGuid().ToString(),
+                sender_uid = TkConfigurationManager.CurrentLocationGUID.ToString(),
+                sender_node_type = _config.ClientId,
+                event_ts = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                event_type = "outcome",
+                encounter_id = encounterId,
+
+                client_data = new
+                {
+                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    client_version = _config.SoftwareVersion,
+                    event_category_id = "7922"
+                },
+
+                events = new
+                {
+                    event_data = new[]
+                      {
+                         new { _key = "method", _value = method },
+                         new { _key = "eventDescription", _value = $"Confidence below threshold--not processed" }
+                    }
+                },
+
+                payload_data = new
+                {
+                    _payload = "",
+                    _payload_type = "STRING"
+                },
+
+                event_count = 2,
+                payload = false
+            }; string json = JsonConvert.SerializeObject(outcome, Formatting.Indented);
+
+            //Console.WriteLine("Mensaje Outcome MQTT:\n" + json); 
+
+            return new MqttApplicationMessageBuilder()
+            .WithTopic("detection-ext")
+            .WithPayload(json)
+            .WithExactlyOnceQoS()
+            .WithRetainFlag(false)
+            .Build();
         }
     }
 }

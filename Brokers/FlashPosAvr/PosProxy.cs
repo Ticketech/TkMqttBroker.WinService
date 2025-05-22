@@ -25,10 +25,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-
-        public async Task<bool> CheckInOutAVR(CheckInRequest avrData)
+        public async Task<CheckInResponse> CheckInOutAVR(CheckInRequest avrData)
         {
-            bool res = false;
+            CheckInResponse result = null;
 
             try
             {
@@ -44,21 +43,21 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
 
-                    var result = JsonConvert.DeserializeObject<CheckInResponse>(responseStr);
-
-                    if (result.code != 0)
-                        throw new Exception($"Processing error. Code:{result.code}.Message:{result.message}.");
-
-                    res = true;
+                    result = JsonConvert.DeserializeObject<CheckInResponse>(responseStr);
                 }
             }
             catch (Exception ex)
             {
-
+                result = new CheckInResponse
+                {
+                    code = -1,
+                    message = ex.Message,
+                };
             }
 
-            return res;
+            return result;
         }
+
 
         private HttpClient GetClient()
         {
