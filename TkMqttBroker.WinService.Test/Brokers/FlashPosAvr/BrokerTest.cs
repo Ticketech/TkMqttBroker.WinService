@@ -25,7 +25,6 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         [TestInitialize]
         public void InitializeTest()
         {
-            FlashPosAvrInitializer.Initialize();
         }
 
 
@@ -35,6 +34,8 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         {
             //tests broker does pos sync correctly
 
+            FlashPosAvrInitializer.Initialize();
+
 
             //A. all ok
             var mqttClient = new MqttClientMock();
@@ -43,7 +44,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.AddAVRFlash();
+            PosProxy.Workstations.SetAVRFlash();
 
             Task.Run(async () =>
             {
@@ -70,7 +71,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.AddAVRFlash();
+            PosProxy.Workstations.SetAVRFlash();
 
             Task.Run(async () =>
             {
@@ -99,7 +100,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.AddAVRFlash();
+            PosProxy.Workstations.SetAVRFlash();
 
             Task.Run(async () =>
             {
@@ -131,16 +132,21 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         [TestMethod]
-        public void TestConsume()
+        public void TestCheckInConsume()
         {
-            //test events are properly consumed
+            //test events are properly consumed for camera on the ENTRY line
+
+            //pos camera device
+            string direction = "ENTRY";
+            string workstationId = PosProxy.Workstations.SetAVRFlash(direction);
+
+            FlashPosAvrInitializer.Initialize();
 
 
             //A. checkin ok
             StayInfo posResponse = new StayInfo
             {
                 checkin_time = DateTime.Now,
-                checkin_wsid = "070",
                 stay_guid = Guid.NewGuid(),
                 stay_type = Tk.Services.REST.Models.Service.EStayTypes.Transient,
                 ticket_number = 200001
@@ -174,9 +180,6 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            string direction = "ENTRY";
-            string workstationId = "077";
-            PosProxy.Workstations.AddAVRFlash(workstationId, direction);
 
             Task.Run(async () =>
             {
@@ -211,12 +214,34 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
 
+            //A. confidence wrong
+
+
+
+
+
+            //A. checkin/out failed
+
+
+
+        }
+
+
+
+        [TestMethod]
+        public void TestCheckOutConsume()
+        {
+            //test events are properly consumed for camera on the EXIT line
+
+            //pos camera device
+            string direction = "EXIT";
+            string workstationId = PosProxy.Workstations.SetAVRFlash(direction);
+
+            FlashPosAvrInitializer.Initialize();
+
 
             //A. checkout ok
-            direction = "EXIT";
-            workstationId = "FLASH077";
-
-            posResponse = new StayInfo
+            var posResponse = new StayInfo
             {
                 checkin_time = DateTime.Now,
                 checkin_wsid = $"{workstationId}",
@@ -226,7 +251,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 checkout_time = DateTime.Now,
             };
 
-            payload = new FVRPayload
+            var payload = new FVRPayload
             {
                 eventData = new FVREventData
                 {
@@ -242,19 +267,18 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 }
             };
 
-            appMess = new MqttApplicationMessage
+            var appMess = new MqttApplicationMessage
             {
                 Topic = "detection",
                 Payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))
             };
 
-            mqttClient = new MqttClientMock();
-            pos = new PosProxyMock(true, posResponse);
-            ng = new NGProxyMock(true);
-            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            var mqttClient = new MqttClientMock();
+            var pos = new PosProxyMock(true, posResponse);
+            var ng = new NGProxyMock(true);
+            var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.AddAVRFlash(workstationId, direction);
 
             Task.Run(async () =>
             {
