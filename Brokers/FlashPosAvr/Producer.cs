@@ -201,7 +201,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 // Convertir el payload a una cadena legible
                 var strPayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
-                logger.Info("Received camera event", "Camera Event", $"Topic:{topic},Payload:{strPayload}");
+                logger.Info("Received camera event", "Camera Event", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Topic:{topic},Payload:{strPayload}");
 
                 if (topic == "detection")
                 {
