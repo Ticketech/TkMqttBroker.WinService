@@ -43,9 +43,9 @@ namespace TkMqttBroker.WinService.Test.Mockers
             return new StayInfo
             {
                 checkin_time = _response.checkin_time,
-                checkin_wsid = _response.checkin_wsid,
+                checkin_wsid = avrData.infoplate.direction == "ENTRY" ? avrData.infoplate.workstation_id : _response.checkin_wsid,
                 checkout_time = avrData.infoplate.direction == "ENTRY"? (DateTime?)null : _response.checkout_time,
-                checkout_wsid = avrData.infoplate.direction == "ENTRY" ? null : _response.checkout_wsid,
+                checkout_wsid = avrData.infoplate.direction == "ENTRY" ? null : avrData.infoplate.workstation_id,
                 plate = avrData.infoplate.plate,
                 stay_guid = Guid.NewGuid(),
                 stay_type = _response.stay_type,

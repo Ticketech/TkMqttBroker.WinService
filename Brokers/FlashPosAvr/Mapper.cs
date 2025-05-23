@@ -244,12 +244,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         internal MqttApplicationMessage CheckStayConsume(string encounterId, string method, StayInfo stay)
         {
             string description = "";
+            string trigger = "";
             if (stay.checkout_time == null) //checkin
             {
-                description = $"Check-In Ticket #{stay.ticket_number} Tag {stay.tag_number}";
+                trigger = "CheckIn";
+
+                description = $"Check-In Ticket #{stay.ticket_number}";
+                if (!string.IsNullOrWhiteSpace(stay.tag_number))
+                    description += $" Tag {stay.tag_number}";
             }
             else //checkout
             {
+                trigger = "CheckOut";
+
                 description = $"Check-Out Ticket #{stay.ticket_number}";
             }
 
@@ -278,7 +285,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                          new { _key = "ticketId", _value = stay.stay_guid.ToString() },
                          new { _key = "ticketNumber", _value = stay.ticket_number.ToString() },
                          new { _key = "ticketType", _value = $"{stay.stay_type} Ticketech" },
-                         new { _key = "ticketTrigger", _value = "CheckIn" },
+                         new { _key = "ticketTrigger", _value = $"{trigger}" },
                          new { _key = "plate", _value = stay.plate },
                          new { _key = "eventDescription", _value = $"{description}" }
                     }

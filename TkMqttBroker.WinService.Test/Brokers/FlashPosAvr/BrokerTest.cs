@@ -175,8 +175,8 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             PosProxy.SyncQueue.Clear();
             string direction = "ENTRY";
-            string workstationNumber = "077";
-            PosProxy.Workstations.AddAVRFlash(workstationNumber, direction);
+            string workstationId = "077";
+            PosProxy.Workstations.AddAVRFlash(workstationId, direction);
 
             Task.Run(async () =>
             {
@@ -207,13 +207,81 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             Assert.AreEqual(pos.LastRequest.infoplate.confidence, PosConfidence(payload.eventData.licensePlateConfidence));
             Assert.AreEqual(pos.LastRequest.infoplate.region_confidence, PosConfidence(payload.eventData.stateConfidence));
             Assert.IsTrue(pos.LastRequest.infoplate.region.Contains(FlashPosAvrPolicy.StateCode(payload.eventData.state).ToLower()));
-            Assert.IsTrue(pos.LastRequest.infoplate.workstation_id.Contains(workstationNumber));
+            Assert.IsTrue(pos.LastRequest.infoplate.workstation_id.Contains(workstationId));
 
 
 
 
             //A. checkout ok
-          
+            direction = "EXIT";
+            workstationId = "FLASH077";
+
+            posResponse = new StayInfo
+            {
+                checkin_time = DateTime.Now,
+                checkin_wsid = $"{workstationId}",
+                stay_guid = Guid.NewGuid(),
+                stay_type = Tk.Services.REST.Models.Service.EStayTypes.Transient,
+                ticket_number = 200001,
+                checkout_time = DateTime.Now,
+            };
+
+            payload = new FVRPayload
+            {
+                eventData = new FVREventData
+                {
+                    color = "RED",
+                    colorConfidence = 0.9,
+                    make = "FORD",
+                    makeConfidence = 0.9,
+                    licensePlate = "1234567",
+                    licensePlateConfidence = 0.9,
+                    encounterId = Guid.NewGuid().ToString(),
+                    state = "new york",
+                    stateConfidence = 0.9,
+                }
+            };
+
+            appMess = new MqttApplicationMessage
+            {
+                Topic = "detection",
+                Payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))
+            };
+
+            mqttClient = new MqttClientMock();
+            pos = new PosProxyMock(true, posResponse);
+            ng = new NGProxyMock(true);
+            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+
+            PosProxy.SyncQueue.Clear();
+            PosProxy.Workstations.AddAVRFlash(workstationId, direction);
+
+            Task.Run(async () =>
+            {
+                await broker.Start();
+
+                await mqttClient.PublishAsync(appMess, CancellationToken.None);
+
+                Thread.Sleep(10000);
+
+                await broker.Stop();
+            }).Wait();
+
+            //ack
+            Assert.IsNotNull(mqttClient.LastAck);
+            Assert.IsTrue(mqttClient.LastAck.Contains(payload.eventData.encounterId));
+
+            //consume
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(payload.eventData.encounterId));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains("CheckOut"));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(posResponse.ticket_number.ToString()));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(posResponse.stay_type.ToString()));
+
+            //pos call
+            Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(payload.eventData.licensePlate));
+            Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(direction));
+            Assert.AreEqual(pos.LastRequest.infoplate.confidence, PosConfidence(payload.eventData.licensePlateConfidence));
+            Assert.AreEqual(pos.LastRequest.infoplate.workstation_id, workstationId);
 
 
 
