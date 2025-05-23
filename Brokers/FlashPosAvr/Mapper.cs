@@ -18,22 +18,22 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public CheckInRequest CheckInRequest(FVRPayload source, FlashPosAvrCameraConfiguration workstation)
+        public CheckInRequest CheckInRequest(FVRPayload payload, FlashPosAvrCameraConfiguration workstation)
         {
             return new CheckInRequest
             {
                 infoplate = new AVRPlateInfo
                 {
-                    camera_id = source.deviceMxId,
-                    confidence = PercentageInt(source.eventData.licensePlateConfidence),
+                    camera_id = payload.deviceMxId,
+                    confidence = PosConfidence(payload.eventData.licensePlateConfidence),
                     direction = workstation.Direction.ToString(),
                     location_id = TkConfigurationManager.CurrentLocationId,
-                    plate = $"{source.eventData.licensePlate} : {workstation.Direction} : Duration : 0hr 0m 0s",
+                    plate = $"{payload.eventData.licensePlate} : {workstation.Direction} : Duration : 0hr 0m 0s",
                     workstation_id = workstation.WorkstationId,
                     workstation_name = workstation.WorkstationId,
-                    id = source.eventId,
-                    lane_id = Convert.ToInt32(source.eventData.laneId), //must be a number!
-                    make = CheckInRequestMake(source.eventData),
+                    id = payload.eventId,
+                    lane_id = Convert.ToInt32(payload.eventData.laneId), //must be a number!
+                    make = CheckInRequestMake(payload.eventData),
               
                     full_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_0.jpg",
                     cropped_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_1.jpg",
@@ -41,12 +41,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     evidence_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_0.jpg",
                     latitude = 0,
                     longitude = 0,
-                    vehicle_category = source.eventData.type,
+                    vehicle_category = payload.eventData.type,
                     headgear = "", //?
-                    colour = CheckInRequestColor(source.eventData),
+                    colour = CheckInRequestColor(payload.eventData),
                     db_match = true, //?
-                    event_timestamp = EpochMiliseconds(source.eventDate),
-                    region = CheckInRequestRegion(source.eventData)
+                    event_timestamp = EpochMiliseconds(payload.eventDate),
+                    region = CheckInRequestRegion(payload.eventData),
+                    region_confidence = PosConfidence(payload.eventData.stateConfidence),
                 },
             };
         }
@@ -54,16 +55,22 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public string CheckInRequestMake(FVREventData eventData)
         {
-            if (eventData.makeConfidence < _config.MakeConfidenceMin)
+            if (PosConfidence(eventData.makeConfidence) < _config.MakeConfidenceMin)
                 return "OTHER";
             else
                 return eventData.make;
         }
 
 
+        public int PosConfidence(double fvrConfidence)
+        {
+            return (int)Math.Round(fvrConfidence * 100.0);
+        }
+
+
         public string CheckInRequestColor(FVREventData eventData)
         {
-            if (eventData.colorConfidence < _config.ColorConfidenceMin)
+            if (PosConfidence(eventData.makeConfidence) < _config.ColorConfidenceMin)
                 return "OTHER";
             else
                 return eventData.color;
@@ -91,11 +98,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
             return (long)t.TotalMilliseconds;
-        }
-
-        public int PercentageInt(double value)
-        {
-            return Convert.ToInt32(Math.Round(value * 100, 2));
         }
 
         public NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest source)

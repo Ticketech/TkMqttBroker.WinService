@@ -137,7 +137,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
             //A. checkin ok
-            StayInfo stay = new StayInfo
+            StayInfo posResponse = new StayInfo
             {
                 checkin_time = DateTime.Now,
                 checkin_wsid = "070",
@@ -169,12 +169,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             };
 
             var mqttClient = new MqttClientMock();
-            var pos = new PosProxyMock(true, stay);
+            var pos = new PosProxyMock(true, posResponse);
             var ng = new NGProxyMock(true);
             var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.AddAVRFlash();
+            string direction = "ENTRY";
+            string workstationNumber = "077";
+            PosProxy.Workstations.AddAVRFlash(workstationNumber, direction);
 
             Task.Run(async () =>
             {
@@ -187,25 +189,31 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 await broker.Stop();
             }).Wait();
 
+            //ack
             Assert.IsNotNull(mqttClient.LastAck);
             Assert.IsTrue(mqttClient.LastAck.Contains(payload.eventData.encounterId));
 
+            //consume
             Assert.IsTrue(mqttClient.LastOutcome.Contains(payload.eventData.encounterId));
             Assert.IsTrue(mqttClient.LastOutcome.Contains("CheckIn"));
-            Assert.IsTrue(mqttClient.LastOutcome.Contains(stay.ticket_number.ToString()));
-            Assert.IsTrue(mqttClient.LastOutcome.Contains(stay.stay_type.ToString()));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(posResponse.ticket_number.ToString()));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(posResponse.stay_type.ToString()));
 
+            //pos call
             Assert.AreEqual(pos.LastRequest.infoplate.colour, payload.eventData.color);
             Assert.AreEqual(pos.LastRequest.infoplate.make, payload.eventData.make);
             Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(payload.eventData.licensePlate));
-            Assert.AreEqual(pos.LastRequest.infoplate.confidence, payload.eventData.licensePlateConfidence);
-            Assert.AreEqual(pos.LastRequest.infoplate.region_confidence, payload.eventData.stateConfidence);
-            Assert.AreEqual(pos.LastRequest.infoplate.region, payload.eventData.state);
+            Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(direction));
+            Assert.AreEqual(pos.LastRequest.infoplate.confidence, PosConfidence(payload.eventData.licensePlateConfidence));
+            Assert.AreEqual(pos.LastRequest.infoplate.region_confidence, PosConfidence(payload.eventData.stateConfidence));
+            Assert.IsTrue(pos.LastRequest.infoplate.region.Contains(FlashPosAvrPolicy.StateCode(payload.eventData.state).ToLower()));
+            Assert.IsTrue(pos.LastRequest.infoplate.workstation_id.Contains(workstationNumber));
 
 
 
 
             //A. checkout ok
+          
 
 
 
@@ -221,5 +229,16 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         }
+
+
+
+
+        // PRIVATE ///////////////////////////////////////////
+
+        public static int PosConfidence(double fvrConfidence)
+        {
+            return (int)Math.Round(fvrConfidence * 100.0);
+        }
+
     }
 }

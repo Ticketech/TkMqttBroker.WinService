@@ -19,16 +19,16 @@ namespace TkMqttBroker.WinService.Test.Proxies
 
         public static class Workstations
         {
-            public static void AddAVRFlash()
+            public static void AddAVRFlash(string workstationNumber = "077", string direction = "ENTRY")
             {
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 delete from LocationsMachinesConfigurations 
-where MachineName = 'FLASH077'
+where MachineName = 'FLASH{workstationNumber}'
 ");
 
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 insert into LocationsMachinesConfigurations
-select LocationGUID, 'FLASH077', LocationMachineConfigurationSection, ConfigurationTypeCode, MachineConfigurationValue, SoftwareVersion
+select LocationGUID, 'FLASH{workstationNumber}', LocationMachineConfigurationSection, ConfigurationTypeCode, MachineConfigurationValue, SoftwareVersion
 from LocationsMachinesConfigurations
 where MachineName = 'avr070'
 and ConfigurationTypeCode = 0;"
@@ -37,8 +37,8 @@ and ConfigurationTypeCode = 0;"
 
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 update LocationsMachinesConfigurations
-set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" location=""192.168.1.10"" spoolerPrefix=""entry"" /></posDevices>'
-where MachineName = 'flash077' and LocationMachineConfigurationSection = 'posdevices'"
+set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" location=""192.168.1.10"" spoolerPrefix=""{direction}"" /></posDevices>'
+where MachineName = 'FLASH{workstationNumber}' and LocationMachineConfigurationSection = 'posdevices'"
 );
             }
         }
