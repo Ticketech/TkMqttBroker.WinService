@@ -289,13 +289,115 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
             //A. plate confidence not enough
+            posResponse = null;
 
+            payload = new FVRPayload
+            {
+                eventData = new FVREventData
+                {
+                    color = "RED",
+                    colorConfidence = 0.9,
+                    make = "FORD",
+                    makeConfidence = 0.9,
+                    licensePlate = "1234567",
+                    licensePlateConfidence = 0.1,
+                    encounterId = Guid.NewGuid().ToString(),
+                    state = "new york",
+                    stateConfidence = 0.9,
+                }
+            };
+
+            appMess = new MqttApplicationMessage
+            {
+                Topic = "detection",
+                Payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))
+            };
+
+            mqttClient = new MqttClientMock();
+            pos = new PosProxyMock(true, posResponse);
+            ng = new NGProxyMock(true);
+            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+
+            PosProxy.SyncQueue.Clear();
+
+            Task.Run(async () =>
+            {
+                await broker.Start();
+
+                await mqttClient.PublishAsync(appMess, CancellationToken.None);
+
+                Thread.Sleep(10000);
+
+                await broker.Stop();
+            }).Wait();
+
+            //ack
+            Assert.IsNotNull(mqttClient.LastAck);
+            Assert.IsTrue(mqttClient.LastAck.Contains(payload.eventData.encounterId));
+
+            //consume
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(payload.eventData.encounterId));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains("Confidence below threshold--not processed"));
+
+            //pos call
+            Assert.IsNull(pos.LastRequest);
 
 
 
 
             //A. checkin failed
+            posResponse = null;
 
+            payload = new FVRPayload
+            {
+                eventData = new FVREventData
+                {
+                    color = "RED",
+                    colorConfidence = 0.9,
+                    make = "FORD",
+                    makeConfidence = 0.9,
+                    licensePlate = "1234567",
+                    licensePlateConfidence = 0.9,
+                    encounterId = Guid.NewGuid().ToString(),
+                    state = "new york",
+                    stateConfidence = 0.9,
+                }
+            };
+
+            appMess = new MqttApplicationMessage
+            {
+                Topic = "detection",
+                Payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))
+            };
+
+            mqttClient = new MqttClientMock();
+            pos = new PosProxyMock(false, posResponse);
+            ng = new NGProxyMock(true);
+            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+
+            PosProxy.SyncQueue.Clear();
+
+            Task.Run(async () =>
+            {
+                await broker.Start();
+
+                await mqttClient.PublishAsync(appMess, CancellationToken.None);
+
+                Thread.Sleep(10000);
+
+                await broker.Stop();
+            }).Wait();
+
+            //ack
+            Assert.IsNotNull(mqttClient.LastAck);
+            Assert.IsTrue(mqttClient.LastAck.Contains(payload.eventData.encounterId));
+
+            //consume
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(payload.eventData.encounterId));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains("Received by POS--check in/out failed"));
+
+            //pos call
+            Assert.IsNotNull(pos.LastRequest);
 
 
         }
