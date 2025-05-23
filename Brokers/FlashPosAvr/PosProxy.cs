@@ -13,6 +13,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrPosProxy : IPosProxy
     {
+        static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+
         private readonly string _serviceUrl;
         private readonly string _apiKey;
 
@@ -34,11 +37,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 using (var client = GetClient())
                 {
                     string ApiCall = _serviceUrl + $"/api/v2/UltraApi/Locations/{TkConfigurationManager.CurrentLocationId}/Stays/AVR";
-                    var request = new StringContent(JsonConvert.SerializeObject(avrData), Encoding.UTF8, "application/json");
+                    string payload = JsonConvert.SerializeObject(avrData);
+                    var request = new StringContent(payload, Encoding.UTF8, "application/json");
+
+                    logger.Info("Request", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
 
                     var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
+
+                    logger.Info("Response", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Response:{responseStr}");
 
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
@@ -48,6 +56,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
             catch (Exception ex)
             {
+                logger.Error("Error checking in/out on pos", "Call Pos CheckInOutAVR", $"Request:{JsonConvert.SerializeObject(avrData)},Message:{ex}");
+
                 result = new CheckInResponse
                 {
                     code = -1,

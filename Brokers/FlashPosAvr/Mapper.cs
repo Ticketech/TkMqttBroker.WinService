@@ -9,6 +9,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrMapper
     {
+        static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly FlashPosAvrBrokerConfiguration _config;
 
         public readonly string CheckStayFailedDescription = "Received by POS--check in/out failed";
@@ -38,16 +40,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     lane_id = Convert.ToInt32(payload.eventData.laneId), //must be a number!
                     make = CheckInRequestMake(payload.eventData),
               
-                    full_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_0.jpg",
-                    cropped_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_1.jpg",
-                    alert = true,
-                    evidence_image = @"https://s3.ap-south-1.amazonaws.com/uploads.live.videoanalytics/Ticketech/Garage%201%20Exit/2020-02-04/1570213035304-Camera/1_51_54am_1580761314474_0.jpg",
+                    full_image = payload.mainImagePath,
+                    cropped_image = payload.lpCropPath,
+                    alert = false,
+                    evidence_image = payload.mainImagePath,
                     latitude = 0,
                     longitude = 0,
                     vehicle_category = payload.eventData.type,
                     headgear = "", //?
                     colour = CheckInRequestColor(payload.eventData),
-                    db_match = true, //?
+                    db_match = false, //?
                     event_timestamp = EpochMiliseconds(payload.eventDate),
                 },
             };
@@ -117,7 +119,34 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest source)
         {
-            return new NGPostAvrEntryRawRequest();
+            return new NGPostAvrEntryRawRequest
+            {
+                infoplate = new NGInfoplate
+                {
+                    gcamera_id = source.infoplate.camera_id,
+                    confidence = source.infoplate.confidence,
+                    direction = source.infoplate.direction,
+                    location_id = source.infoplate.location_id,
+                    plate = source.infoplate.plate,
+                    workstation_id = source.infoplate.workstation_id,
+                    workstation_name = source.infoplate.workstation_name,
+                    Id = source.infoplate.id,
+                    lane_id = source.infoplate.lane_id,
+                    make = source.infoplate.make,
+
+                    full_image = source.infoplate.full_image,
+                    cropped_image = source.infoplate.cropped_image,
+                    alert = source.infoplate.alert,
+                    evidence_image = source.infoplate.evidence_image,
+                    latitude = source.infoplate.latitude,
+                    longitude = source.infoplate.longitude,
+                    vehicle_category = source.infoplate.vehicle_category,
+                    headgear = source.infoplate.headgear,
+                    colour = source.infoplate.colour,
+                    db_match = source.infoplate.db_match,
+                    event_timestamp = source.infoplate.event_timestamp.ToString(),
+                }
+            };
         }
 
 

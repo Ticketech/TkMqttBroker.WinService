@@ -13,6 +13,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //gmz.next. created.
     public partial class FlashPosAvrService : ServiceBase
     {
+        static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+
         private FlashPosAvrBroker _broker;
 
         public FlashPosAvrService()

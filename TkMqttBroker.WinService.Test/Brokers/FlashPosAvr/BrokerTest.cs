@@ -484,20 +484,6 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(direction));
             Assert.AreEqual(pos.LastRequest.infoplate.confidence, PosConfidence(payload.eventData.licensePlateConfidence));
             Assert.AreEqual(pos.LastRequest.infoplate.workstation_id, workstationId);
-
-
-
-
-            //A. confidence wrong
-
-
-
-
-
-            //A. checkin/out failed
-
-
-
         }
 
 

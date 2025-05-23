@@ -11,6 +11,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //gmz.next. created.
     public class FlashPosAvrBroker
     {
+        public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private static SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 
         private readonly IMqttClient _mqttClient;
@@ -32,6 +34,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             _repo = new FlashPosAvrRepository();
             _mapper = new FlashPosAvrMapper();
             _ng = new FlashPosAvrNGProxy();
+
+            logger.Info("Broker initialized");
         }
 
 
@@ -49,7 +53,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Start()
         {
-            _configuration = FlashPosAvrPolicy.GetBrokerPolicies();
+            _configuration = FlashPosAvrPolicy.BrokerPolicies;
 
             //connect to cameras
             foreach (var cameraConfig in FlashPosAvrPolicy.GetCameraConfigurations())
@@ -68,6 +72,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
 
             StartTimer();
+
+            logger.Info("Broker started");
         }
 
 
@@ -125,13 +131,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     }
                     catch (Exception ex)
                     {
-
+                        logger.Error("Error syncing an item", "Sync Item", $"SynqGuid:{sync.SynqGUID},Message:{ex}");
                     }
                 }
             }
             catch (Exception ex)
             {
-
+                logger.Error("Error syncing the queue", "Sync Queue", ex);
             }
             finally
             {
@@ -158,6 +164,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 _semaphoreSlim.Release();
             }
+
+            logger.Info("Broker stopped");
         }
 
     }

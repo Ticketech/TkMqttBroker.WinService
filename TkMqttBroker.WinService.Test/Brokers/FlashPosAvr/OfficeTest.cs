@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TkMqttBroker.WinService.Brokers.FlashPosAvr;
+using TkMqttBroker.WinService.Test.Mockers;
 
 namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 {
@@ -29,7 +30,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 //IP = "10.30.50.106", // "broker.hivemq.com"
                 Port = 1884,
             };
-            var reader = new FlashPosAvrReader(configuration);
+            var reader = new FPAProducerMock(configuration);
 
             Task.Run(async () => 
             {

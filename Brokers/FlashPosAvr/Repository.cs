@@ -13,16 +13,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrRepository
     {
+        static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly FlashPosAvrBrokerConfiguration _configuration;
         private readonly string _dataType; //table syncqueues
-        private readonly string _softwareVersion;
 
 
         public FlashPosAvrRepository()
         {
-            _softwareVersion = System.Reflection.Assembly.GetAssembly(
-                typeof(FlashPosAvrService)).GetName().Version.ToString();
+            _configuration = FlashPosAvrPolicy.BrokerPolicies;
 
-            _dataType = "FlashPosAvrBroker";
+            _dataType = "FPABroker";
         }
 
 
@@ -43,7 +43,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     SynqData = JsonConvert.SerializeObject(data),
                     SynqDataType = _dataType,
                     SynqSyncDate = null,
-                    SoftwareVersion = _softwareVersion,
+                    SoftwareVersion = _configuration.SoftwareVersion,
                     Timestamp = currentTime,
                 };
 

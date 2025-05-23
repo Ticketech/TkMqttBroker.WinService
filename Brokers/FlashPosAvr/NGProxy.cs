@@ -14,6 +14,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     public class FlashPosAvrNGProxy: INGProxy
     {
+        static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly FlashPosAvrBrokerConfiguration _config;
 
 
@@ -32,11 +34,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 using (var client = GetClient())
                 {
                     string ApiCall = _config.NGServiceUrl + $"/api/core/avr/entry/raw";
-                    var request = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+                    string payload = JsonConvert.SerializeObject(data);
+                    var request = new StringContent(payload, Encoding.UTF8, "application/json");
+
+                    logger.Info("Request", "Send Raw Avr", $"Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
 
                     var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
+
+                    logger.Info("Response", "Send Raw Avr", $"Url:{ApiCall},Response:{responseStr}");
 
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
@@ -49,7 +56,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
             catch (Exception ex)
             {
-
+                logger.Error("Error sending raw avr", "Send Raw Avr", $"Param:{JsonConvert.SerializeObject(data)},Error:{ex}");
             }
 
             return res;

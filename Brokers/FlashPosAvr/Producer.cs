@@ -75,9 +75,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Start()
         {
+            bool res = false;
+
             //create client
             if (_mqttClient == null)
-                await CreateProducer();
+                res = await CreateProducer();
+
+            if (res)
+                logger.Info("Camera client started", "Start", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
+            else
+                logger.Error("Camera client cannot start", "Start", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
         }
 
 
@@ -99,6 +106,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 _semaphoreSlim.Release();
             }
+
+            logger.Info("Camera client stopped", "Stop", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
         }
 
 
@@ -106,27 +115,31 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public void ReportBlackout()
         {
             if (_lastHearbeat < DateTime.Now.AddMinutes(-2))
-                logger.Warn($"Possible camera balckuut.", "Camera Balckout", $"Workstation:{_cameraConfiguration.WorkstationId},LastHB:{_lastHearbeat:HH:mm:ss}");
+                logger.Warn($"Possible camera balckuut.", "Camera Balckout", $"Workstation:{_cameraConfiguration?.WorkstationId},LastHB:{_lastHearbeat:HH:mm:ss}");
         }
 
 
-        private async Task CreateProducer()
+        private async Task<bool> CreateProducer()
         {
-            // Create a MQTT client factory
-            var factory = new MqttFactory();
+            bool res = false;
 
-            // Create a MQTT client instance
-            _mqttClient = factory.CreateMqttClient();
+            try
+            {
+                // Create a MQTT client factory
+                var factory = new MqttFactory();
 
-            // Create MQTT client options
-            var options = new MqttClientOptionsBuilder()
-                .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
-                //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
-                .WithClientId(_brokerConfig.ClientId) //(_clientId)
-                .WithCleanSession()
-                .WithTls(
-                    o =>
-                    {
+                // Create a MQTT client instance
+                _mqttClient = factory.CreateMqttClient();
+
+                // Create MQTT client options
+                var options = new MqttClientOptionsBuilder()
+                    .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
+                                                                                       //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
+                    .WithClientId(_brokerConfig.ClientId) //(_clientId)
+                    .WithCleanSession()
+                    .WithTls(
+                        o =>
+                        {
                         // The used public broker sometimes has invalid certificates. This sample accepts all
                         // certificates. This should not be used in live environments.
                         o.CertificateValidationHandler = _ => true;
@@ -138,24 +151,32 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         //var certificate = new X509Certificate("/opt/emqxsl-ca.crt", "");
                         //o.Certificates = new List<X509Certificate> { certificate };
                     }
-                )
-                .Build();
+                    )
+                    .Build();
 
-            //connect
-            var connectResult = await _mqttClient.ConnectAsync(options, CancellationToken.None);
+                //connect
+                var connectResult = await _mqttClient.ConnectAsync(options, CancellationToken.None);
 
-            //subscribe
-            if (connectResult.ResultCode == MqttClientConnectResultCode.Success)
+                //subscribe
+                if (connectResult.ResultCode == MqttClientConnectResultCode.Success)
+                {
+                    // Subscribe to a topic
+                    await _mqttClient.SubscribeAsync("detection");
+                    //await _mqttClient.SubscribeAsync("heartbeat");
+
+                    // Callback function when a message is received
+                    //_mqttClient.ApplicationMessageReceivedHandler = this;
+                    _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceivedEvent(e));
+                }
+
+                res = true;
+            }
+            catch(Exception ex)
             {
-                // Subscribe to a topic
-                await _mqttClient.SubscribeAsync("detection");
-                //await _mqttClient.SubscribeAsync("heartbeat");
-
-                // Callback function when a message is received
-                //_mqttClient.ApplicationMessageReceivedHandler = this;
-                _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceivedEvent(e));
+                logger.Error("Error creating camera client", "Create Camera Client", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
             }
 
+            return res;
         }
 
 
@@ -212,6 +233,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     await _mqttClient.PublishAsync(_mapper.HearbeatAck());
                 }
             }
+            catch(Exception ex)
+            {
+                logger.Error("Error processing camera event", "Camera Event", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
+            }
             finally
             {
                 _semaphoreSlim.Release();
@@ -220,33 +245,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
     }
-
-
-
-    public class FlashPosAvrReader : FlashPosAvrProducer
-    {
-        public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-
-        public FlashPosAvrReader(FlashPosAvrCameraConfiguration configuration)
-            : base(configuration)
-        { }
-
-
-        protected override async Task OnUseApplicationMessageReceivedEvent(MqttApplicationMessageReceivedEventArgs data)
-        {
-            string otherdata = JsonConvert.SerializeObject(data);
-
-            logger.Info("FVR new message", "FVR Message", otherdata);
-        }
-
-    }
-
-
-
-
-
-
 
 
 }

@@ -18,8 +18,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public static void Initialize()
         {
-            InitializeLog4Net();
-            InitializePos();
+            try
+            {
+                InitializeLog4Net();
+                InitializePos();
+            }
+            catch (Exception e)
+            {
+                logger.Error("Error initializing broker", "Initialize Boker", e);
+                throw;
+            }
         }
 
 
@@ -38,28 +46,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private static void InitializePos()
         {
-            try
+            Locations locations = Tk.ConfigurationManager.TkConfigurationManager.GetLocationsFromConfigFile();
+
+            if (locations == null)
             {
-                Locations locations = Tk.ConfigurationManager.TkConfigurationManager.GetLocationsFromConfigFile();
+                int hasElemts = 0;
 
-                if (locations == null)
-                {
-                    int hasElemts = 0;
-
-                    locations = DataRepository.LocationsProvider.GetPaged(0, 1, out hasElemts)[0];
-                }
-
-                TkConfigurationManager.CurrentLocationGUID = locations.LocationGUID;
-                TkConfigurationManager.CurrentCompanyGUID = locations.CompanyGUID;
-                TkConfigurationManager.CurrentLocationCode = locations.LocationCode.Trim(); //gmz.33.0.
-                TkConfigurationManager.CurrentLocationId = locations.LocationId.Trim(); //gmz.33.0.
-
+                locations = DataRepository.LocationsProvider.GetPaged(0, 1, out hasElemts)[0];
             }
-            catch (Exception e)
-            {
-                logger.Error(e.Message, "InitializerManager Error", e);
-                throw;
-            }
+
+            TkConfigurationManager.CurrentLocationGUID = locations.LocationGUID;
+            TkConfigurationManager.CurrentCompanyGUID = locations.CompanyGUID;
+            TkConfigurationManager.CurrentLocationCode = locations.LocationCode.Trim(); //gmz.33.0.
+            TkConfigurationManager.CurrentLocationId = locations.LocationId.Trim(); //gmz.33.0.
         }
 
     }

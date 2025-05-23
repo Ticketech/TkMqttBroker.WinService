@@ -43,29 +43,36 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public static LocationPolicies GetPosPolicies()
         {
-            
-            int count = 0;
-            var polloc = DataRepository.PoliciesLocationsProvider.GetPaged(
-                $"policyversion = 0 and getdate() between effectivefrom and effectiveto"
-                , $"effectivefrom desc", 0, 1, out count).First();
+            try
+            {
+                int count = 0;
+                var polloc = DataRepository.PoliciesLocationsProvider.GetPaged(
+                    $"policyversion = 0 and getdate() between effectivefrom and effectiveto"
+                    , $"effectivefrom desc", 0, 1, out count).First();
 
-            var policy = DeserializeLocationPoliciesFromXML(polloc.PolicyValue);
+                var policy = DeserializeLocationPoliciesFromXML(polloc.PolicyValue);
                 //.Replace("<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n", "")
                 //.Replace(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"","")
                 //);
 
-            return policy;
+                return policy;
 
 
-            LocationPolicies DeserializeLocationPoliciesFromXML(string xml)
+                LocationPolicies DeserializeLocationPoliciesFromXML(string xml)
+                {
+                    LocationPolicies policies = Serializer.CustomXmlDeserialize<LocationPolicies>(xml);
+
+                    policies.Initialize();
+
+                    policies.InitializeDefaults();
+
+                    return policies;
+                }
+            }
+            catch(Exception ex)
             {
-                LocationPolicies policies = Serializer.CustomXmlDeserialize<LocationPolicies>(xml);
-
-                policies.Initialize();
-
-                policies.InitializeDefaults();
-
-                return policies;
+                logger.Error("Error initializing policies", "Init Policies", ex);
+                throw;
             }
 
         }
@@ -120,12 +127,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 {
                     if (device.Type == "AVR" && device.Model == "AVRFlash")
                     {
-                        configs.Add(new FlashPosAvrCameraConfiguration
+                        try
                         {
-                            WorkstationId = workstationId,
-                            IP = device.Location,
-                            Direction = (FPADirection)Enum.Parse(typeof(FPADirection), device.SpoolerPrefix.ToUpper()), //entry or exit
-                        });
+                            configs.Add(new FlashPosAvrCameraConfiguration
+                            {
+                                WorkstationId = workstationId,
+                                IP = device.Location,
+                                Direction = (FPADirection)Enum.Parse(typeof(FPADirection), device.SpoolerPrefix.ToUpper()), //entry or exit
+                            });
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.Error("Error getting camer configuration", "Get Camera Configuration", $"WorkstationId:{workstationId},Error:{ex}");
+                        }
                     }
                 }
             }
@@ -139,13 +153,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
             string localIp = null;
 
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            try
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
                 {
-                    localIp = ip.ToString();
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        localIp = ip.ToString();
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                logger.Error("Error getting local ip", "Get Local IP", ex);
             }
 
             return localIp;
