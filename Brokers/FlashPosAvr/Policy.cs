@@ -41,6 +41,22 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
+
+        public static void SetPosPolicies(LocationPolicies policy)
+        {
+            int count = 0;
+            var polloc = DataRepository.PoliciesLocationsProvider.GetPaged(
+                $"policyversion = 0 and getdate() between effectivefrom and effectiveto"
+                , $"effectivefrom desc", 0, 1, out count).First();
+
+            polloc.PolicyValue = Serializer.CustomXmlSerialize<LocationPolicies>(policy);
+            polloc.EntityState = EntityState.Changed;
+
+            DataRepository.PoliciesLocationsProvider.Save(polloc);
+
+            return;
+        }
+
         public static LocationPolicies GetPosPolicies()
         {
             try
@@ -94,7 +110,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 ClientId = $"tkt:fpa-broker:{TkConfigurationManager.CurrentLocationId}",
 
                 SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString(),
-            };
+
+                PosServiceUrl = config.PosServiceUrl,
+                PosApiKey = ConfigurationDecrypter.DecryptValueWithHeader(config.PosApiKey),
+        };
 
             var pospolicy = GetPosPolicies();
 

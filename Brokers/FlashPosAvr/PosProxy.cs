@@ -15,16 +15,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-
-        private readonly string _serviceUrl;
-        private readonly string _apiKey;
+        private readonly FlashPosAvrBrokerConfiguration _config;
 
         public FlashPosAvrPosProxy()
         {
-            var config = global::TkMqttBroker.WinService.Properties.FlashPosAvr.Default;
-
-            _serviceUrl = config.PosServiceUrl;
-            _apiKey = ConfigurationDecrypter.DecryptValueWithHeader(config.PosApiKey);
+            _config = FlashPosAvrPolicy.BrokerPolicies;
         }
 
 
@@ -36,17 +31,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 using (var client = GetClient())
                 {
-                    string ApiCall = _serviceUrl + $"/api/v2/UltraApi/Locations/{TkConfigurationManager.CurrentLocationId}/Stays/AVR";
+                    string ApiCall = _config.PosServiceUrl + $"/api/v2/UltraApi/Locations/{TkConfigurationManager.CurrentLocationId}/Stays/AVR";
                     string payload = JsonConvert.SerializeObject(avrData);
                     var request = new StringContent(payload, Encoding.UTF8, "application/json");
 
-                    logger.Info("Request", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Payload:{payload}");
+                    logger.Info("Request Pos CheckInOutAVR", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
 
                     var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
 
-                    logger.Info("Response", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Response:{responseStr}");
+                    logger.Info("Response Pos CheckInOutAVR", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Response:{responseStr}");
 
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
@@ -82,7 +77,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             var client = new HttpClient(handler);
 
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_apiKey}");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_config.PosApiKey}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.Timeout = new TimeSpan(0, 0, 15);

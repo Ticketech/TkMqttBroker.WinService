@@ -29,6 +29,7 @@ namespace TkMqttBroker.WinService
             {
                 new FlashPosAvrService()
             };
+
             ServiceBase.Run(ServicesToRun);
         }
     }

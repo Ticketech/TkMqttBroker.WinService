@@ -4,6 +4,7 @@ using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Client.Subscribing;
+using MQTTnet.Exceptions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -94,13 +95,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 await _semaphoreSlim.WaitAsync();
 
-                await _mqttClient.UnsubscribeAsync("detection");
-                await _mqttClient.UnsubscribeAsync("heartbeat");
-                await _mqttClient.DisconnectAsync();
+                if (_mqttClient.IsConnected)
+                {
+                    await _mqttClient.UnsubscribeAsync("detection");
+                    await _mqttClient.UnsubscribeAsync("heartbeat");
+                    await _mqttClient.DisconnectAsync();
+                }
             }
             catch (Exception ex)
             {
-
+                logger.Error("Failed to disconnect from mqtt client", "Stop", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
             }
             finally
             {
@@ -167,9 +171,12 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     // Callback function when a message is received
                     //_mqttClient.ApplicationMessageReceivedHandler = this;
                     _mqttClient.UseApplicationMessageReceivedHandler(async e => await OnUseApplicationMessageReceivedEvent(e));
-                }
 
-                res = true;
+                    res = true;
+                }
+                else
+                    throw new Exception($"Cannot connect to camera. WorkstationId:{_cameraConfiguration.WorkstationId}, ResultCode:{connectResult.ResultCode}");
+
             }
             catch(Exception ex)
             {
@@ -193,6 +200,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 var topic = e.ApplicationMessage.Topic;
                 // Convertir el payload a una cadena legible
                 var strPayload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+
+                logger.Info("Received camera event", "Camera Event", $"Topic:{topic},Payload:{strPayload}");
 
                 if (topic == "detection")
                 {
@@ -233,6 +242,12 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     await _mqttClient.PublishAsync(_mapper.HearbeatAck());
                 }
             }
+            catch(MqttCommunicationException ex)
+            {
+                logger.Error("Disconnection detected. Will try to reconnect", "Camera Event", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
+
+                await Reconnect();
+            }
             catch(Exception ex)
             {
                 logger.Error("Error processing camera event", "Camera Event", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
@@ -243,7 +258,19 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
         }
 
+        private async Task Reconnect()
+        {
+            try
+            {
+                _mqttClient.Dispose();
 
+                await CreateProducer();
+            }
+            catch(Exception ex)
+            {
+                logger.Error("Reconnection failed", "Reconnect", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
+            }
+        }
     }
 
 

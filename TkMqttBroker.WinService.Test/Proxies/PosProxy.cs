@@ -19,9 +19,9 @@ namespace TkMqttBroker.WinService.Test.Proxies
 
         public static class Workstations
         {
-            public static string SetAVRFlash(string direction = "ENTRY")
+            public static string SetAVRFlash(string direction = "ENTRY", string ip = "127.0.0.1")
             {
-                string workstationId = "FLASH077";
+                string workstationId = "AVR079";
 
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 delete from LocationsMachinesConfigurations 
@@ -39,7 +39,7 @@ and ConfigurationTypeCode = 0;"
 
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 update LocationsMachinesConfigurations
-set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" location=""192.168.1.10"" spoolerPrefix=""{direction}"" /></posDevices>'
+set MachineConfigurationValue = '<posDevices> <device name=""AVR"" type=""AVR"" model=""AVRFlash"" required=""false"" location=""{ip}"" spoolerPrefix=""{direction}"" /></posDevices>'
 where MachineName = '{workstationId}' and LocationMachineConfigurationSection = 'posdevices'"
 );
 

@@ -37,13 +37,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     string payload = JsonConvert.SerializeObject(data);
                     var request = new StringContent(payload, Encoding.UTF8, "application/json");
 
-                    logger.Info("Request", "Send Raw Avr", $"Url:{ApiCall},Payload:{payload}");
+                    logger.Info("Request NG raw avr", "Send Raw Avr", $"Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
 
                     var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
 
-                    logger.Info("Response", "Send Raw Avr", $"Url:{ApiCall},Response:{responseStr}");
+                    logger.Info("Response NG raw avr", "Send Raw Avr", $"Url:{ApiCall},Response:{responseStr}");
 
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");

@@ -37,7 +37,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     workstation_id = workstation.WorkstationId,
                     workstation_name = workstation.WorkstationId,
                     id = payload.eventId,
-                    lane_id = Convert.ToInt32(payload.eventData.laneId), //must be a number!
+                    lane_id = PosLaneId(payload.eventData.laneId), //must be a number!
                     make = CheckInRequestMake(payload.eventData),
               
                     full_image = payload.mainImagePath,
@@ -60,6 +60,15 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             return map;
         }
 
+
+        public int PosLaneId(string laneId)
+        {
+            int result;
+            if (int.TryParse(laneId, out result))
+                return result;
+            else
+                return 0;
+        }
 
         public string CheckInRequestMake(FVREventData eventData)
         {
