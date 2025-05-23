@@ -194,16 +194,15 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         //publish result
                         if (res.code == 0)
                         {
-                            if (res.stay.checkout_time == null) //checkin
-                                await _mqttClient.PublishAsync(_mapper.CheckInConsume(payload.eventData.encounterId, method, res.stay));
-                            else //checkout
-                                await _mqttClient.PublishAsync(_mapper.CheckoutConsume(payload.eventData.encounterId, method, res.stay));
+                            await _mqttClient.PublishAsync(_mapper.CheckStayConsume(payload.eventData.encounterId, method, res.stay));
                         }
                         else
-                            await _mqttClient.PublishAsync(_mapper.CheckFailedConsume(payload.eventData.encounterId, method));
+                            await _mqttClient.PublishAsync(_mapper.EventWithDescriptionConsume(
+                                payload.eventData.encounterId, method, _mapper.CheckStayFailedDescription));
                     }
                     else
-                        await _mqttClient.PublishAsync(_mapper.NoConfidenceConsume(payload.eventData.encounterId, method));
+                        await _mqttClient.PublishAsync(_mapper.EventWithDescriptionConsume(
+                            payload.eventData.encounterId, method, _mapper.NoConfidenceDescription));
                 }
                 else if (topic == "heartbeat")
                 {
