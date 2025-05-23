@@ -135,6 +135,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         public void TestCheckInConsume()
         {
             //test events are properly consumed for camera on the ENTRY line
+            //only one flash camera must be in devices for this test to work
 
             //pos camera device
             string direction = "ENTRY";
@@ -214,13 +215,86 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
 
-            //A. confidence wrong
+
+            //A. make, color, state confidence not enough
+            posResponse = new StayInfo
+            {
+                checkin_time = DateTime.Now,
+                stay_guid = Guid.NewGuid(),
+                stay_type = Tk.Services.REST.Models.Service.EStayTypes.Transient,
+                ticket_number = 200001
+            };
+
+            payload = new FVRPayload
+            {
+                eventData = new FVREventData
+                {
+                    color = "RED",
+                    colorConfidence = 0.1,
+                    make = "FORD",
+                    makeConfidence = 0.1,
+                    licensePlate = "1234567",
+                    licensePlateConfidence = 0.9,
+                    encounterId = Guid.NewGuid().ToString(),
+                    state = "oregon",
+                    stateConfidence = 0.1,
+                }
+            };
+
+            appMess = new MqttApplicationMessage
+            {
+                Topic = "detection",
+                Payload = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload))
+            };
+
+            mqttClient = new MqttClientMock();
+            pos = new PosProxyMock(true, posResponse);
+            ng = new NGProxyMock(true);
+            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+
+            PosProxy.SyncQueue.Clear();
+
+            Task.Run(async () =>
+            {
+                await broker.Start();
+
+                await mqttClient.PublishAsync(appMess, CancellationToken.None);
+
+                Thread.Sleep(10000);
+
+                await broker.Stop();
+            }).Wait();
+
+            //ack
+            Assert.IsNotNull(mqttClient.LastAck);
+            Assert.IsTrue(mqttClient.LastAck.Contains(payload.eventData.encounterId));
+
+            //consume
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(payload.eventData.encounterId));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains("CheckIn"));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(posResponse.ticket_number.ToString()));
+            Assert.IsTrue(mqttClient.LastOutcome.Contains(posResponse.stay_type.ToString()));
+
+            //pos call
+            Assert.AreEqual(pos.LastRequest.infoplate.colour, "OTHER");
+            Assert.AreEqual(pos.LastRequest.infoplate.make, "OTHER");
+            Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(payload.eventData.licensePlate));
+            Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(direction));
+            Assert.AreEqual(pos.LastRequest.infoplate.confidence, PosConfidence(payload.eventData.licensePlateConfidence));
+            Assert.AreEqual(pos.LastRequest.infoplate.region_confidence, 100); //100% default state
+            Assert.IsTrue(pos.LastRequest.infoplate.region.Contains("ny")); //default state = location state
+            Assert.IsTrue(pos.LastRequest.infoplate.workstation_id.Contains(workstationId));
+
+
+
+
+            //A. plate confidence not enough
 
 
 
 
 
-            //A. checkin/out failed
+            //A. checkin failed
 
 
 
@@ -232,6 +306,8 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         public void TestCheckOutConsume()
         {
             //test events are properly consumed for camera on the EXIT line
+            //only one flash camera must be in devices for this test to work
+
 
             //pos camera device
             string direction = "EXIT";

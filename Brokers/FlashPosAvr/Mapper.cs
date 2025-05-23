@@ -23,7 +23,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public CheckInRequest CheckInRequest(FVRPayload payload, FlashPosAvrCameraConfiguration workstation)
         {
-            return new CheckInRequest
+            var map = new CheckInRequest
             {
                 infoplate = new AVRPlateInfo
                 {
@@ -49,10 +49,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     colour = CheckInRequestColor(payload.eventData),
                     db_match = true, //?
                     event_timestamp = EpochMiliseconds(payload.eventDate),
-                    region = CheckInRequestRegion(payload.eventData),
-                    region_confidence = PosConfidence(payload.eventData.stateConfidence),
                 },
             };
+
+            //region
+            CheckInRequestRegion(map, payload.eventData);
+
+            return map;
         }
 
 
@@ -80,17 +83,26 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public string CheckInRequestRegion(FVREventData eventData)
+        public void CheckInRequestRegion(CheckInRequest target, FVREventData eventData)
         {
-            if (eventData.stateConfidence < _config.StateConfidenceMin)
-                return $"us-{_config.DefaultStateCode}".ToLower();
+            if (PosConfidence(eventData.stateConfidence) < _config.StateConfidenceMin)
+            {
+                target.infoplate.region = $"us-{_config.DefaultStateCode}".ToLower();
+                target.infoplate.region_confidence = 100;
+            }
             else
             {
                 string code = FlashPosAvrPolicy.StateCode(eventData.state);
                 if (code == null)
-                    return $"us-{_config.DefaultStateCode}".ToLower();
+                {
+                    target.infoplate.region = $"us-{_config.DefaultStateCode}".ToLower();
+                    target.infoplate.region_confidence = 100;
+                }
                 else
-                    return $"us-{FlashPosAvrPolicy.StateCode(eventData.state)}".ToLower();
+                {
+                    target.infoplate.region = $"us-{FlashPosAvrPolicy.StateCode(eventData.state)}".ToLower();
+                    target.infoplate.region_confidence = PosConfidence(eventData.stateConfidence);
+                }
             }
         }
 
