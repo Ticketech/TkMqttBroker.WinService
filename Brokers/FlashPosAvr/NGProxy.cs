@@ -37,7 +37,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     string payload = JsonConvert.SerializeObject(data);
                     var request = new StringContent(payload, Encoding.UTF8, "application/json");
 
-                    logger.Info("Request NG raw avr", "Send Raw Avr", $"Url:{ApiCall},Payload:{payload}");
+                    logger.Info("Request NG raw avr", "Send Raw Avr", $"POST,Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
 
@@ -48,7 +48,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
 
-                    if (response.StatusCode != HttpStatusCode.Created)
+                    if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
                         throw new Exception($"Processing error. Code:{response.StatusCode}.Message:{responseStr}.");
 
                     res = true;
@@ -77,7 +77,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             var client = new HttpClient(handler);
 
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_config.NGApiKey}");
+            //client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"Bearer {_config.NGApiKey}");
+            client.DefaultRequestHeaders.Add("x-api-key", _config.NGApiKey);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.Timeout = new TimeSpan(0, 0, 5);

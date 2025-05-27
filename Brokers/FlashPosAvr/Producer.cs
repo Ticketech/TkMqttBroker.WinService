@@ -116,10 +116,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
-        public void ReportBlackout()
+        public bool ReportBlackout()
         {
+            bool wasblackout = false;
+
             if (_lastHearbeat < DateTime.Now.AddMinutes(-2))
+            {
+                wasblackout = true;
                 logger.Warn($"Possible camera balckuut.", "Camera Balckout", $"Workstation:{_cameraConfiguration?.WorkstationId},LastHB:{_lastHearbeat:HH:mm:ss}");
+            }
+
+            return wasblackout;
         }
 
 
@@ -258,17 +265,26 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
         }
 
-        private async Task Reconnect()
+
+        public async Task Reconnect()
         {
             try
             {
+                await _semaphoreSlim.WaitAsync();
+
                 _mqttClient.Dispose();
 
                 await CreateProducer();
+
+                _lastHearbeat = DateTime.Now;
             }
             catch(Exception ex)
             {
                 logger.Error("Reconnection failed", "Reconnect", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
     }

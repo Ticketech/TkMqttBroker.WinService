@@ -149,7 +149,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     evidence_image = source.infoplate.evidence_image,
                     latitude = source.infoplate.latitude,
                     longitude = source.infoplate.longitude,
-                    vehicle_category = source.infoplate.vehicle_category,
+                    vehicle_category = NGVehicleCategory(source.infoplate.vehicle_category),
                     headgear = source.infoplate.headgear,
                     colour = source.infoplate.colour,
                     db_match = source.infoplate.db_match,
@@ -158,6 +158,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             };
         }
 
+        public string NGVehicleCategory(string vehicle_category)
+        {
+            return "CAR"; //default until we know what is in source
+        }
 
         public MqttApplicationMessage DetectionAck(string encounterId)
         {

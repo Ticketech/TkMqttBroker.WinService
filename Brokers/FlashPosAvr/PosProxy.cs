@@ -35,7 +35,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     string payload = JsonConvert.SerializeObject(avrData);
                     var request = new StringContent(payload, Encoding.UTF8, "application/json");
 
-                    logger.Info("Request Pos CheckInOutAVR", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Payload:{payload}");
+                    logger.Info("Request Pos CheckInOutAVR", "Call Pos CheckInOutAVR", $"POST, Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
 

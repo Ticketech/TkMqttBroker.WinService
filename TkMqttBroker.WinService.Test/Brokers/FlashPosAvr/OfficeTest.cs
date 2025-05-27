@@ -28,8 +28,9 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             FlashPosAvrInitializer.Initialize();
 
             var pospolicy = FlashPosAvrPolicy.GetPosPolicies();
-            pospolicy.TicketechNG.NGService.ServiceUrl.Value = "https://mpk.ticketech.app";
-            pospolicy.TicketechNG.CoreApiKey.Value = "_HD1.0_KtCiFm5CzX1bpwaU35It4pDBq0YB4TuWFVUS9DxQWNSxog+q/vL02P2U38nccSvBuA3N/LrIYKO4x9sWgMNpLvwgWbxhn6Y+M4Y/z+rJgnw7AaBI8F+ChzhJ1m7PIfHrsixm9gHtWw3UMKjnZpr13QiEvvIXv0cj6G4cEj13oz8OZmlw6uraxA==";
+            pospolicy.TicketechNG.NGService.ServiceUrl.Value = "https://mpk.parkingdreams.app";
+            //prod. pospolicy.TicketechNG.CoreApiKey.Value = "_HD1.0_KtCiFm5CzX1bpwaU35It4pDBq0YB4TuWFVUS9DxQWNSxog+q/vL02P2U38nccSvBuA3N/LrIYKO4x9sWgMNpLvwgWbxhn6Y+M4Y/z+rJgnw7AaBI8F+ChzhJ1m7PIfHrsixm9gHtWw3UMKjnZpr13QiEvvIXv0cj6G4cEj13oz8OZmlw6uraxA==";
+            pospolicy.TicketechNG.CoreApiKey.Value = "_HD1.0_AAPKKtkouejdpPCQMeVRTgsCxRUJETk4/+qH8OZ9MeZgv2Vr3VVJAH1W0AJfwrQU2fmA4hgeRll1rRh4MU+D0j6TgGfY+KxjEgB2r9BbfHh1lKxahQjP1TeT3pTwU+bGrCZ4U6YI7bXSbWThNwFaGOE8nNa62TseqBApCBEQPS7RTZCb8+sc1g==";
             FlashPosAvrPolicy.SetPosPolicies(pospolicy);
 
 

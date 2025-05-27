@@ -93,7 +93,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 //cameras
                 foreach(var camera in _producers)
                 {
-                    camera.ReportBlackout();
+                    if(camera.ReportBlackout())
+                    {
+                        await camera.Reconnect();
+                    }
                 }
 
                 //ng
