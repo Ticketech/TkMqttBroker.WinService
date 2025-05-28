@@ -150,10 +150,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     lane_id = source.infoplate.lane_id,
                     make = source.infoplate.make,
 
-                    full_image = source.infoplate.full_image,
-                    cropped_image = source.infoplate.cropped_image,
+                    unsigned_gcp_full = source.infoplate.full_image,
+                    unsigned_gcp_cropped = source.infoplate.cropped_image,
                     alert = source.infoplate.alert,
-                    evidence_image = source.infoplate.evidence_image,
+                    unsigned_gcp_evidence = source.infoplate.evidence_image,
                     latitude = source.infoplate.latitude,
                     longitude = source.infoplate.longitude,
                     vehicle_category = NGVehicleCategory(source.infoplate.vehicle_category),

@@ -158,6 +158,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string workstation_name;
         public string workstation_id;
         public string location_id;
+
+        public string unsigned_gcp_full;
+        public string unsigned_gcp_cropped;
+        public string unsigned_gcp_evidence;
     }
 
     #endregion
