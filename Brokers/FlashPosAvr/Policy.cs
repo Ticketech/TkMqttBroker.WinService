@@ -21,23 +21,23 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
 
 
-    public static class FlashPosAvrPolicy
+    public static class FPAPolicy
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static readonly FlashPosAvrBrokerConfiguration _brokerPolicies;
+        private static readonly FPABrokerConfiguration _brokerPolicies;
 
 
 
-        static FlashPosAvrPolicy()
+        static FPAPolicy()
         {
             _brokerPolicies = GetBrokerPolicies();
         }
 
 
-        public static FlashPosAvrBrokerConfiguration BrokerPolicies
+        public static FPABrokerConfiguration BrokerPolicies
         {
-            get { return (FlashPosAvrBrokerConfiguration)_brokerPolicies.Clone(); }
+            get { return (FPABrokerConfiguration)_brokerPolicies.Clone(); }
         }
 
 
@@ -94,11 +94,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public static FlashPosAvrBrokerConfiguration GetBrokerPolicies()
+        public static FPABrokerConfiguration GetBrokerPolicies()
         {
             var config = global::TkMqttBroker.WinService.Properties.FlashPosAvr.Default;
 
-            var policy = new FlashPosAvrBrokerConfiguration
+            var policy = new FPABrokerConfiguration
             {
                 CameraPort = config.CameraPort,
 
@@ -109,7 +109,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                 ClientId = $"tkt:fpa-broker:{TkConfigurationManager.CurrentLocationId}",
 
-                SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString(),
+                SoftwareVersion = System.Reflection.Assembly.GetAssembly(typeof(FPAService)).GetName().Version.ToString(),
 
                 PosServiceUrl = config.PosServiceUrl,
                 PosApiKey = ConfigurationDecrypter.DecryptValueWithHeader(config.PosApiKey),
@@ -136,9 +136,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //list of camera ips
-        public static List<FlashPosAvrCameraConfiguration> GetCameraConfigurations()
+        public static List<FPACameraConfiguration> GetCameraConfigurations()
         {
-            List<FlashPosAvrCameraConfiguration> configs = new List<FlashPosAvrCameraConfiguration>();
+            List<FPACameraConfiguration> configs = new List<FPACameraConfiguration>();
 
             foreach (var workstationId in TkConfigurationManager.GetWorkstations())
             {
@@ -148,7 +148,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     {
                         try
                         {
-                            configs.Add(new FlashPosAvrCameraConfiguration
+                            configs.Add(new FPACameraConfiguration
                             {
                                 WorkstationId = workstationId,
                                 IP = device.Location,

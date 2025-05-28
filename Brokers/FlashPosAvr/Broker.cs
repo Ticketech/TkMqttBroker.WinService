@@ -9,43 +9,43 @@ using Tk.Services.REST.Models.Stays;
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     //gmz.next. created.
-    public class FlashPosAvrBroker
+    public class FPABroker
     {
         public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private static SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 
         private readonly IMqttClient _mqttClient;
-        private readonly FlashPosAvrRepository _repo;
+        private readonly FPARepository _repo;
         private readonly INGProxy _ng;
         private readonly IPosProxy _pos;
-        private readonly FlashPosAvrMapper _mapper;
+        private readonly FPAMapper _mapper;
 
-        private List<FlashPosAvrProducer> _producers = new List<FlashPosAvrProducer>();
-        private FlashPosAvrBrokerConfiguration _configuration;
+        private List<FPAProducer> _producers = new List<FPAProducer>();
+        private FPABrokerConfiguration _configuration;
 
         Timer _timer;
 
 
-        public FlashPosAvrBroker()
+        public FPABroker()
         {
             _mqttClient = null;
 
-            _repo = new FlashPosAvrRepository();
-            _mapper = new FlashPosAvrMapper();
-            _ng = new FlashPosAvrNGProxy();
+            _repo = new FPARepository();
+            _mapper = new FPAMapper();
+            _ng = new FPANGProxy ();
 
             logger.Info("Broker initialized");
         }
 
 
         //for testing
-        public FlashPosAvrBroker(IMqttClientMock mqttMock, IPosProxy posMock, INGProxy ngMock)
+        public FPABroker(IMqttClientMock mqttMock, IPosProxy posMock, INGProxy ngMock)
         {
             _mqttClient = mqttMock;
 
-            _repo = new FlashPosAvrRepository();
-            _mapper = new FlashPosAvrMapper();
+            _repo = new FPARepository();
+            _mapper = new FPAMapper();
             _ng = ngMock;
             _pos = posMock;
         }
@@ -53,18 +53,18 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Start()
         {
-            _configuration = FlashPosAvrPolicy.BrokerPolicies;
+            _configuration = FPAPolicy.BrokerPolicies;
 
             //connect to cameras
-            foreach (var cameraConfig in FlashPosAvrPolicy.GetCameraConfigurations())
+            foreach (var cameraConfig in FPAPolicy.GetCameraConfigurations())
             {
                 cameraConfig.Port = _configuration.CameraPort;
 
-                FlashPosAvrProducer producer;
+                FPAProducer producer;
                 if (_mqttClient == null)
-                    producer = new FlashPosAvrProducer(cameraConfig);
+                    producer = new FPAProducer(cameraConfig);
                 else
-                    producer = new FlashPosAvrProducer(cameraConfig, _mqttClient as IMqttClientMock, _pos);
+                    producer = new FPAProducer(cameraConfig, _mqttClient as IMqttClientMock, _pos);
 
                 _producers.Add(producer);
 

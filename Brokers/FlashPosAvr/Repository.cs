@@ -11,22 +11,22 @@ using System.Collections.Generic;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class FlashPosAvrRepository
+    public class FPARepository
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private readonly FlashPosAvrBrokerConfiguration _configuration;
+        private readonly FPABrokerConfiguration _configuration;
         private readonly string _dataType; //table syncqueues
 
 
-        public FlashPosAvrRepository()
+        public FPARepository()
         {
-            _configuration = FlashPosAvrPolicy.BrokerPolicies;
+            _configuration = FPAPolicy.BrokerPolicies;
 
             _dataType = "FPABroker";
         }
 
 
-        ~FlashPosAvrRepository()
+        ~FPARepository()
         {
         }
 

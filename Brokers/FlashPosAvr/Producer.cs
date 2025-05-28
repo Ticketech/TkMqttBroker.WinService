@@ -21,18 +21,18 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     //credits: https://docs.google.com/document/d/1meiNhvV4Ooz-nrf5kF48nSXbK1YwT85rgXonwDnlf5o/edit?tab=t.0
 
 
-    public class FlashPosAvrProducer //: IMqttApplicationMessageReceivedHandler
+    public class FPAProducer //: IMqttApplicationMessageReceivedHandler
     {
         public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly FlashPosAvrRepository _repo;
-        private readonly FlashPosAvrMapper _mapper;
+        private readonly FPARepository _repo;
+        private readonly FPAMapper _mapper;
         private readonly IPosProxy _pos;
 
         private readonly SemaphoreSlim _semaphoreSlim;
 
-        private readonly FlashPosAvrBrokerConfiguration _brokerConfig;
-        private readonly FlashPosAvrCameraConfiguration _cameraConfiguration;
+        private readonly FPABrokerConfiguration _brokerConfig;
+        private readonly FPACameraConfiguration _cameraConfiguration;
         //private readonly string _clientId;
 
         private IMqttClient _mqttClient;
@@ -40,13 +40,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera, IMqttClientMock mqttMock, IPosProxy posMock)
+        public FPAProducer(FPACameraConfiguration camera, IMqttClientMock mqttMock, IPosProxy posMock)
         {
-            _brokerConfig = FlashPosAvrPolicy.BrokerPolicies;
+            _brokerConfig = FPAPolicy.BrokerPolicies;
 
             _cameraConfiguration = camera;
-            _repo = new FlashPosAvrRepository();
-            _mapper = new FlashPosAvrMapper();
+            _repo = new FPARepository();
+            _mapper = new FPAMapper();
             _pos = posMock;
 
             _semaphoreSlim = new SemaphoreSlim(1);
@@ -59,14 +59,14 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
-        public FlashPosAvrProducer(FlashPosAvrCameraConfiguration camera)
+        public FPAProducer(FPACameraConfiguration camera)
         {
-            _brokerConfig = FlashPosAvrPolicy.BrokerPolicies;
+            _brokerConfig = FPAPolicy.BrokerPolicies;
 
             _cameraConfiguration = camera;
-            _repo = new FlashPosAvrRepository();
-            _mapper = new FlashPosAvrMapper();
-            _pos = new FlashPosAvrPosProxy();
+            _repo = new FPARepository();
+            _mapper = new FPAMapper();
+            _pos = new FPAPosProxy();
 
             _semaphoreSlim = new SemaphoreSlim(1);
 

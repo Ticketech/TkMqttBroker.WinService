@@ -40,7 +40,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     }
 
 
-    public class FlashPosAvrBrokerConfiguration
+    public class FPABrokerConfiguration
     {
         public int CameraPort;
         public string ClientId;
@@ -57,9 +57,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string PosApiKey;
         public string PosServiceUrl;
 
-        public FlashPosAvrBrokerConfiguration Clone()
+        public FPABrokerConfiguration Clone()
         {
-            var clone = (FlashPosAvrBrokerConfiguration)this.MemberwiseClone();
+            var clone = (FPABrokerConfiguration)this.MemberwiseClone();
 
             return clone;
         }
@@ -72,7 +72,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
     }
 
 
-    public class FlashPosAvrCameraConfiguration
+    public class FPACameraConfiguration
     {
         public string WorkstationId;
         public string IP;

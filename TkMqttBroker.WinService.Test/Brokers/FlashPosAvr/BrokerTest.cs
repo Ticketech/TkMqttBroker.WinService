@@ -34,14 +34,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
         {
             //tests broker does pos sync correctly
 
-            FlashPosAvrInitializer.Initialize();
+            FPAInitializer.Initialize();
 
 
             //A. all ok
             var mqttClient = new MqttClientMock();
             var pos = new PosProxyMock(true, null);
             var ng = new NGProxyMock(true);
-            var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            var broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
             PosProxy.Workstations.SetAVRFlash();
@@ -68,7 +68,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             mqttClient = new MqttClientMock();
             pos = new PosProxyMock(false, null);
             ng = new NGProxyMock(true);
-            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
             PosProxy.Workstations.SetAVRFlash();
@@ -97,7 +97,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             mqttClient = new MqttClientMock();
             pos = new PosProxyMock(true, null);
             ng = new NGProxyMock(false);
-            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
             PosProxy.Workstations.SetAVRFlash();
@@ -141,7 +141,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             string direction = "ENTRY";
             string workstationId = PosProxy.Workstations.SetAVRFlash(direction);
 
-            FlashPosAvrInitializer.Initialize();
+            FPAInitializer.Initialize();
 
 
             //A. checkin ok
@@ -178,7 +178,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             var mqttClient = new MqttClientMock();
             var pos = new PosProxyMock(true, posResponse);
             var ng = new NGProxyMock(true);
-            var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            var broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -210,7 +210,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             Assert.IsTrue(pos.LastRequest.infoplate.plate.Contains(direction));
             Assert.AreEqual(pos.LastRequest.infoplate.confidence, PosConfidence(payload.eventData.licensePlateConfidence));
             Assert.AreEqual(pos.LastRequest.infoplate.region_confidence, PosConfidence(payload.eventData.stateConfidence));
-            Assert.IsTrue(pos.LastRequest.infoplate.region.Contains(FlashPosAvrPolicy.StateCode(payload.eventData.state).ToLower()));
+            Assert.IsTrue(pos.LastRequest.infoplate.region.Contains(FPAPolicy.StateCode(payload.eventData.state).ToLower()));
             Assert.IsTrue(pos.LastRequest.infoplate.workstation_id.Contains(workstationId));
 
 
@@ -250,7 +250,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             mqttClient = new MqttClientMock();
             pos = new PosProxyMock(true, posResponse);
             ng = new NGProxyMock(true);
-            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -316,7 +316,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             mqttClient = new MqttClientMock();
             pos = new PosProxyMock(true, posResponse);
             ng = new NGProxyMock(true);
-            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -373,7 +373,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             mqttClient = new MqttClientMock();
             pos = new PosProxyMock(false, posResponse);
             ng = new NGProxyMock(true);
-            broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -415,7 +415,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             string direction = "EXIT";
             string workstationId = PosProxy.Workstations.SetAVRFlash(direction);
 
-            FlashPosAvrInitializer.Initialize();
+            FPAInitializer.Initialize();
 
 
             //A. checkout ok
@@ -454,7 +454,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             var mqttClient = new MqttClientMock();
             var pos = new PosProxyMock(true, posResponse);
             var ng = new NGProxyMock(true);
-            var broker = new FlashPosAvrBroker(mqttClient, pos, ng);
+            var broker = new FPABroker(mqttClient, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 

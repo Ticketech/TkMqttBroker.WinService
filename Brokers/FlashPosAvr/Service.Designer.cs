@@ -1,7 +1,7 @@
 ﻿
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    partial class FlashPosAvrService
+    partial class FPAService
     {
         /// <summary> 
         /// Required designer variable.

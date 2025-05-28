@@ -9,12 +9,12 @@ using TkMqttBroker.WinService.Brokers.FlashPosAvr;
 
 namespace TkMqttBroker.WinService.Test.Mockers
 {
-    public class FPAProducerMock : FlashPosAvrProducer
+    public class FPAProducerMock : FPAProducer
     {
         public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-        public FPAProducerMock(FlashPosAvrCameraConfiguration configuration)
+        public FPAProducerMock(FPACameraConfiguration configuration)
             : base(configuration)
         { }
 

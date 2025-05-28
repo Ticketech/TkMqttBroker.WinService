@@ -11,7 +11,7 @@ using Tk.Utilities.Log4Net;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public static class FlashPosAvrInitializer
+    public static class FPAInitializer
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -39,7 +39,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             Log4NetHelper.setAdoNetAppenderConnection(trmgr.ConnectionString);
             ConfigFileSections configFileSections = (ConfigFileSections)System.Configuration.ConfigurationManager.GetSection("currentLocationGUID");
             Log4NetHelper.setLocationGuid(new Guid(configFileSections.CurrentLocationGUID));
-            Log4NetHelper.setSoftwareVersion(Assembly.GetAssembly(typeof(FlashPosAvrService)).GetName().Version.ToString());
+            Log4NetHelper.setSoftwareVersion(Assembly.GetAssembly(typeof(FPAService)).GetName().Version.ToString());
             trmgr.Dispose();
         }
 

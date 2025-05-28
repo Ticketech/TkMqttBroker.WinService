@@ -12,16 +12,16 @@ using Tk.ConfigurationManager;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class FlashPosAvrNGProxy: INGProxy
+    public class FPANGProxy : INGProxy
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly FlashPosAvrBrokerConfiguration _config;
+        private readonly FPABrokerConfiguration _config;
 
 
-        public FlashPosAvrNGProxy()
+        public FPANGProxy ()
         {
-            _config = FlashPosAvrPolicy.BrokerPolicies;
+            _config = FPAPolicy.BrokerPolicies;
         }
 
 

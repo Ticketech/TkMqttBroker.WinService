@@ -11,21 +11,21 @@ using System.Threading.Tasks;
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
     //gmz.next. created.
-    public partial class FlashPosAvrService : ServiceBase
+    public partial class FPAService : ServiceBase
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-        private FlashPosAvrBroker _broker;
+        private FPABroker _broker;
 
-        public FlashPosAvrService()
+        public FPAService()
         {
             InitializeComponent();
         }
 
         protected override void OnStart(string[] args)
         {
-            _broker = new FlashPosAvrBroker();
+            _broker = new FPABroker();
 
             _broker.Start();
         }

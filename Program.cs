@@ -22,12 +22,12 @@ namespace TkMqttBroker.WinService
         /// </summary>
         static void Main()
         {
-            FlashPosAvrInitializer.Initialize();
+            FPAInitializer.Initialize();
 
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new FlashPosAvrService()
+                new FPAService()
             };
 
             ServiceBase.Run(ServicesToRun);

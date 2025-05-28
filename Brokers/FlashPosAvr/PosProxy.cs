@@ -11,15 +11,15 @@ using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class FlashPosAvrPosProxy : IPosProxy
+    public class FPAPosProxy : IPosProxy
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly FlashPosAvrBrokerConfiguration _config;
+        private readonly FPABrokerConfiguration _config;
 
-        public FlashPosAvrPosProxy()
+        public FPAPosProxy()
         {
-            _config = FlashPosAvrPolicy.BrokerPolicies;
+            _config = FPAPolicy.BrokerPolicies;
         }
 
 

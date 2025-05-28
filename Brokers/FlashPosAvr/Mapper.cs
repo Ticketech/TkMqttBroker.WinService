@@ -8,23 +8,23 @@ using Tk.Services.REST.Models.Stays;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    public class FlashPosAvrMapper
+    public class FPAMapper
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly FlashPosAvrBrokerConfiguration _config;
+        private readonly FPABrokerConfiguration _config;
 
         public readonly string CheckStayFailedDescription = "Received by POS--check in/out failed";
         public readonly string NoConfidenceDescription = "Confidence below threshold--not processed";
 
 
-        public FlashPosAvrMapper()
+        public FPAMapper()
         {
-            _config = FlashPosAvrPolicy.BrokerPolicies;
+            _config = FPAPolicy.BrokerPolicies;
         }
 
 
-        public CheckInRequest CheckInRequest(FVRPayload payload, FlashPosAvrCameraConfiguration workstation)
+        public CheckInRequest CheckInRequest(FVRPayload payload, FPACameraConfiguration workstation)
         {
             var map = new CheckInRequest
             {
@@ -110,7 +110,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
             else
             {
-                string code = FlashPosAvrPolicy.StateCode(eventData.state);
+                string code = FPAPolicy.StateCode(eventData.state);
                 if (code == null)
                 {
                     target.infoplate.region = $"us-{_config.DefaultStateCode}".ToLower();
@@ -118,7 +118,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 }
                 else
                 {
-                    target.infoplate.region = $"us-{FlashPosAvrPolicy.StateCode(eventData.state)}".ToLower();
+                    target.infoplate.region = $"us-{FPAPolicy.StateCode(eventData.state)}".ToLower();
                     target.infoplate.region_confidence = PosConfidence(eventData.stateConfidence);
                 }
             }
@@ -183,7 +183,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 encounter_id = encounterId,
                 client_data = new
                 {
-                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    ip_address = FPAPolicy.GetLocalIPAddress(),
                     client_version = _config.SoftwareVersion,
                     event_category_id = ""
                 },
@@ -224,7 +224,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 encounter_id = (string)null,
                 client_data = new
                 {
-                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    ip_address = FPAPolicy.GetLocalIPAddress(),
                     client_version = _config.SoftwareVersion,
                     event_category_id = ""
                 },
@@ -266,7 +266,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                 client_data = new
                 {
-                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    ip_address = FPAPolicy.GetLocalIPAddress(),
                     client_version = _config.SoftwareVersion,
                     event_category_id = "7922"
                 },
@@ -333,7 +333,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                 client_data = new
                 {
-                    ip_address = FlashPosAvrPolicy.GetLocalIPAddress(),
+                    ip_address = FPAPolicy.GetLocalIPAddress(),
                     client_version = _config.SoftwareVersion,
                     event_category_id = "7922"
                 },
