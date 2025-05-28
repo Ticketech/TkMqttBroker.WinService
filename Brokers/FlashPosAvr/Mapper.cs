@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Specialized;
+using System.Linq;
 using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
 
@@ -43,7 +44,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     full_image = payload.mainImagePath,
                     cropped_image = payload.lpCropPath,
                     alert = false,
-                    evidence_image = payload.mainImagePath,
+                    evidence_image = CheckInRequestEvidenceImage(payload),
                     latitude = 0,
                     longitude = 0,
                     vehicle_category = payload.eventData.type,
@@ -60,6 +61,12 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             return map;
         }
 
+        public string CheckInRequestEvidenceImage(FVRPayload payload)
+        {
+            var path = payload.lpCropPaths?.Where(e => e != null && e.Contains("__IR__LPC.jpg")).FirstOrDefault();
+
+            return path;
+        }
 
         public int PosLaneId(string laneId)
         {

@@ -2,6 +2,6 @@
 TK.MQTT.BROKER.WINSERVICE gmz.next. (May 2025)
 ==============================================================================
 
-- gmz. Added. First version.
+- gmz. Added. FlashPOsAvr Broker. First version. Goes with pos v2.1.58.90.
 
 ------------------------------------------------------------------------------
