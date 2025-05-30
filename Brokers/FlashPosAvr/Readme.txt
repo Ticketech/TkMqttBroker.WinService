@@ -57,8 +57,8 @@ c. currentLocationGUID and currentWorkStationId as always
 -------------------------------------------------------------------------
 A. INSTALLING / RUNNING / QUERYING / STOPPING / DELETING
 
-- Copy files into service folder (c:\TkServices???)
-- sc create TkBroker binPath="(service folder)\TktMqttBorker.WinService.exe"
+- Copy files into service folder (c:\pos\Services\FlashAvr)
+- sc create TkFlashAvr binPath="c:\pos\Services\FlashAvr\TkFlashAvr.WinService.exe"
 - sc start tkbroker
 - sc query tkbroker
 - sc stop tkbroker
