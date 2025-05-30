@@ -50,5 +50,22 @@ c. currentLocationGUID and currentWorkStationId as always
     - spoolerPrefix = ENTRY or EXIT, depending on which direction the camera is looking for
     - Eg., <posDevices> <device name="AVR" type="AVR" model="AVRFlash" required="false" location="10.30.50.106" spoolerPrefix="ENTRY" /></posDevices>
 
--------------------------------------------------------------------------
+1. Suite Services
+    - Add avr permits to list used to create the Core Api Key: write, read, edit , del:avr_entry
 
+
+-------------------------------------------------------------------------
+A. INSTALLING / RUNNING / QUERYING / STOPPING / DELETING
+
+- Copy files into service folder (c:\TkServices???)
+- sc create TkBroker "(service folder)\TktMqttBorker.WinService.exe"
+- sc start tkbroker
+- sc query tkbroker
+- sc stop tkbroker
+- sc delete tkbroker
+
+- Must have admin permits to run commands
+- Service User must have access to folder
+
+
+-------------------------------------------------------------------------

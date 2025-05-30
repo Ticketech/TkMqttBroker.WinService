@@ -20,19 +20,51 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public FPAService()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+
+                FPAInitializer.Initialize();
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Error creating service", "Create Service", ex);
+            }
         }
 
         protected override void OnStart(string[] args)
         {
-            _broker = new FPABroker();
+            try
+            {
+                _broker = new FPABroker();
 
-            _broker.Start();
+                Task.Run(async () =>
+                {
+                    await _broker.Start();
+                }).Wait();
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Error starting service", "Start Service", ex);
+            }
+         
+            
         }
 
         protected override void OnStop()
         {
-            _broker.Stop();
+            try
+            {
+                Task.Run(async () =>
+                {
+                    await _broker.Stop();
+                }).Wait();
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Error stopping service", "Stop Service", ex);
+            }
+          
         }
     }
 }

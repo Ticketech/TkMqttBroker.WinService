@@ -123,7 +123,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             if (_lastHearbeat < DateTime.Now.AddMinutes(-2))
             {
                 wasblackout = true;
-                logger.Warn($"Possible camera balckuut.", "Camera Balckout", $"Workstation:{_cameraConfiguration?.WorkstationId},LastHB:{_lastHearbeat:HH:mm:ss}");
+                logger.Warn($"Possible camera blackout.", "Camera Blackout", $"Workstation:{_cameraConfiguration?.WorkstationId},LastHB:{_lastHearbeat:HH:mm:ss}");
             }
 
             return wasblackout;
@@ -202,6 +202,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
             try
             {
+                _lastHearbeat = DateTime.Now;
+
                 await _semaphoreSlim.WaitAsync();
 
                 var topic = e.ApplicationMessage.Topic;
@@ -243,8 +245,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 }
                 else if (topic == "heartbeat")
                 {
-                    _lastHearbeat = DateTime.Now;
-
                     //ack
                     await _mqttClient.PublishAsync(_mapper.HearbeatAck());
                 }
