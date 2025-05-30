@@ -58,7 +58,7 @@ c. currentLocationGUID and currentWorkStationId as always
 A. INSTALLING / RUNNING / QUERYING / STOPPING / DELETING
 
 - Copy files into service folder (c:\TkServices???)
-- sc create TkBroker "(service folder)\TktMqttBorker.WinService.exe"
+- sc create TkBroker binPath="(service folder)\TktMqttBorker.WinService.exe"
 - sc start tkbroker
 - sc query tkbroker
 - sc stop tkbroker
