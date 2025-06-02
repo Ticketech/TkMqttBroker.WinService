@@ -32,17 +32,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         private readonly SemaphoreSlim _semaphoreSlim;
 
         private readonly FPABrokerConfiguration _brokerConfig;
+        private readonly string _clientId;
         private readonly FPACameraConfiguration _cameraConfiguration;
-        //private readonly string _clientId;
 
         private IMqttClient _mqttClient;
         private DateTime _lastHearbeat;
+
+        private bool _isActive;
 
 
         //for testing
         public FPAProducer(FPACameraConfiguration camera, IMqttClientMock mqttMock, IPosProxy posMock)
         {
             _brokerConfig = FPAPolicy.BrokerPolicies;
+            _clientId = $"{_brokerConfig}:{camera.WorkstationId}"; //actual producer's client it
 
             _cameraConfiguration = camera;
             _repo = new FPARepository();
@@ -62,6 +65,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public FPAProducer(FPACameraConfiguration camera)
         {
             _brokerConfig = FPAPolicy.BrokerPolicies;
+            _clientId = $"{_brokerConfig}:{camera.WorkstationId}"; //actual producer's client it
 
             _cameraConfiguration = camera;
             _repo = new FPARepository();
@@ -83,7 +87,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 res = await CreateProducer();
 
             if (res)
+            {
+                _isActive = true;
+
                 logger.Info("Camera client started", "Start", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
+            }
             else
                 logger.Error("Camera client cannot start", "Start", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
         }
@@ -108,6 +116,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
             finally
             {
+                _isActive = false;
+
                 _semaphoreSlim.Release();
             }
 
@@ -146,7 +156,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 var options = new MqttClientOptionsBuilder()
                     .WithTcpServer(_cameraConfiguration.IP, _cameraConfiguration.Port) // MQTT broker address and port
                                                                                        //.WithCredentials(_cameraConfiguration.Username, _cameraConfiguration.Password) // Set username and password
-                    .WithClientId(_brokerConfig.ClientId) //(_clientId)
+                    .WithClientId(_clientId)
                     .WithCleanSession()
                     .WithTls(
                         o =>
@@ -200,11 +210,15 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             //todo: respond to all events
             const string method = "POS.Rest.CheckInOutAVR";
 
+            logger.Debug($"Message from camera", "Camera Event", $"WorkstatinId:{_cameraConfiguration.WorkstationId},IsActive:{_isActive}");
+
             try
             {
                 _lastHearbeat = DateTime.Now;
 
                 await _semaphoreSlim.WaitAsync();
+
+                if (!_isActive) return;
 
                 var topic = e.ApplicationMessage.Topic;
                 // Convertir el payload a una cadena legible
@@ -216,13 +230,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 {
                     var payload = JsonConvert.DeserializeObject<FVRPayload>(strPayload);
 
-                    //ack mqtt
-                    await _mqttClient.PublishAsync(_mapper.DetectionAck(payload.eventData.encounterId));
-
                     CheckInRequest avrData = _mapper.CheckInRequest(payload, _cameraConfiguration);
 
                     //save data to sync ng
                     await _repo.Add(avrData);
+
+                    //ack mqtt
+                    await _mqttClient.PublishAsync(_mapper.DetectionAck(payload.eventData.encounterId));
 
                     //check confidence
                     if (avrData.infoplate.confidence >= _brokerConfig.PlateConfidenceMin)
@@ -233,7 +247,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         //publish result
                         if (res.code == 0)
                         {
-                            await _mqttClient.PublishAsync(_mapper.CheckStayConsume(payload.eventData.encounterId, method, res.stay));
+                            await _mqttClient.PublishAsync(_mapper.CheckStayConsume(payload.eventData.encounterId, method, res.stay, avrData));
                         }
                         else
                             await _mqttClient.PublishAsync(_mapper.EventWithDescriptionConsume(
@@ -270,13 +284,15 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         {
             try
             {
-                await _semaphoreSlim.WaitAsync();
+                //await _semaphoreSlim.WaitAsync();
 
                 _mqttClient.Dispose();
 
                 await CreateProducer();
 
                 _lastHearbeat = DateTime.Now;
+
+                _isActive = true;
             }
             catch(Exception ex)
             {
@@ -284,7 +300,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
             finally
             {
-                _semaphoreSlim.Release();
+                //_semaphoreSlim.Release();
             }
         }
     }

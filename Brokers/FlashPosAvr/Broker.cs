@@ -95,7 +95,16 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 {
                     if(camera.ReportBlackout())
                     {
-                        await camera.Reconnect();
+                        try
+                        {
+                            await _semaphoreSlim.WaitAsync();
+
+                            await camera.Reconnect();
+                        }
+                        finally
+                        {
+                            _semaphoreSlim.Release();
+                        }
                     }
                 }
 

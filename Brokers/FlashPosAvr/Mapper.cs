@@ -302,11 +302,22 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
 
-        internal MqttApplicationMessage CheckStayConsume(string encounterId, string method, StayInfo stay)
+        internal MqttApplicationMessage CheckStayConsume(string encounterId, string method, StayInfo stay, CheckInRequest avrData)
         {
             string description = "";
             string trigger = "";
-            if (stay.checkout_time == null) //checkin
+
+            if (stay == null) //eg, transient exit, no co is made by rest
+            {
+                trigger = "Seen";
+
+                description = $"Seen Plate {avrData.infoplate.plate}/{avrData.infoplate.direction}";
+                stay = new StayInfo
+                {
+                    plate = avrData.infoplate.plate,
+                };
+            }
+            else if (stay.checkout_time == null) //checkin
             {
                 trigger = "CheckIn";
 
