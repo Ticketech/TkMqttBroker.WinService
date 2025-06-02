@@ -236,7 +236,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     await _repo.Add(avrData);
 
                     //ack mqtt
-                    await _mqttClient.PublishAsync(_mapper.DetectionAck(payload.eventData.encounterId));
+                    await PublishAndLog("Ack Detection", _mapper.DetectionAck(payload.eventData.encounterId));
 
                     //check confidence
                     if (avrData.infoplate.confidence >= _brokerConfig.PlateConfidenceMin)
@@ -247,20 +247,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         //publish result
                         if (res.code == 0)
                         {
-                            await _mqttClient.PublishAsync(_mapper.CheckStayConsume(payload.eventData.encounterId, method, res.stay, avrData));
+                            await PublishAndLog("Outcome Stay OK", _mapper.CheckStayConsume(payload.eventData.encounterId, method, res.stay, avrData));
                         }
                         else
-                            await _mqttClient.PublishAsync(_mapper.EventWithDescriptionConsume(
+                            await PublishAndLog("Outcome Stay Failure", _mapper.EventWithDescriptionConsume(
                                 payload.eventData.encounterId, method, _mapper.CheckStayFailedDescription));
                     }
                     else
-                        await _mqttClient.PublishAsync(_mapper.EventWithDescriptionConsume(
+                        await PublishAndLog("Outcome Plate No Confidence", _mapper.EventWithDescriptionConsume(
                             payload.eventData.encounterId, method, _mapper.NoConfidenceDescription));
                 }
                 else if (topic == "heartbeat")
                 {
                     //ack
-                    await _mqttClient.PublishAsync(_mapper.HearbeatAck());
+                    await PublishAndLog("Ack Heartbeat", _mapper.HearbeatAck());
                 }
             }
             catch(MqttCommunicationException ex)
@@ -277,6 +277,17 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 _semaphoreSlim.Release();
             }
+
+
+
+            // MACROS ////////////////////////////////
+            async Task PublishAndLog(string logMessage, MqttApplicationMessage message)
+            {
+                logger.Debug(logMessage, "Publish Event", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{JsonConvert.SerializeObject(message)}");
+
+                await _mqttClient.PublishAsync(message);
+            }
+
         }
 
 
