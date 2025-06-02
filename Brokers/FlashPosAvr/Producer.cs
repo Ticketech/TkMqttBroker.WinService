@@ -257,6 +257,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                         await PublishAndLog("Outcome Plate No Confidence", _mapper.EventWithDescriptionConsume(
                             payload.eventData.encounterId, method, _mapper.NoConfidenceDescription));
                 }
+
                 else if (topic == "heartbeat")
                 {
                     //ack
@@ -296,6 +297,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             try
             {
                 //await _semaphoreSlim.WaitAsync();
+                logger.Debug("Reconnecting", "Reconnect", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
 
                 _mqttClient.Dispose();
 
