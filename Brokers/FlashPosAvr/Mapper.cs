@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
+using Tk.BridgeComponent.KernelData.Data;
 using Tk.ConfigurationManager;
 using Tk.Services.REST.Models.Stays;
 
@@ -52,6 +53,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     colour = CheckInRequestColor(payload.eventData),
                     db_match = false, //?
                     event_timestamp = EpochMiliseconds(payload.eventDate),
+
+                    source = ValueMappingSourceEnum.FlashFVR.ToString().ToLower(),
                 },
             };
 

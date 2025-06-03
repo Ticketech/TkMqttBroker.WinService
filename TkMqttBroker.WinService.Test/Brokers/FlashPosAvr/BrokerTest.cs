@@ -49,6 +49,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             string inWkid = "AVR079";
             string outWkid = "AVR073";
+            PosProxy.WorkstationsProxy.ClearAVRFlash();
+            PosProxy.WorkstationsProxy.AddAVRFlash(inWkid, "ENTRY");
+            PosProxy.WorkstationsProxy.AddAVRFlash(outWkid, "EXIT");
+
 
             var broker = new FPABroker(new Dictionary<string, IMqttClientMock>
                 {
@@ -97,12 +101,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             FPAInitializer.Initialize();
 
-            string wkid = PosProxy.Workstations.SetAVRFlash();
+            string workstationId = "AVR079";
+            PosProxy.WorkstationsProxy.ClearAVRFlash();
+            PosProxy.WorkstationsProxy.AddAVRFlash(workstationId);
 
 
             //A. all ok
             var mqttClient = new MqttClientMock();
-            var mqttMocks = new Dictionary<string, IMqttClientMock> { { wkid, mqttClient } };
+            var mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             var pos = new PosProxyMock(true, null);
             var ng = new NGProxyMock(true);
             var broker = new FPABroker(mqttMocks, pos, ng);
@@ -129,7 +135,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             //A. pos fails
             mqttClient = new MqttClientMock();
-            mqttMocks = new Dictionary<string, IMqttClientMock> { { wkid, mqttClient } };
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             pos = new PosProxyMock(false, null);
             ng = new NGProxyMock(true);
             broker = new FPABroker(mqttMocks, pos, ng);
@@ -158,13 +164,12 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             //A. ng fails, then ok
             mqttClient = new MqttClientMock();
-            mqttMocks = new Dictionary<string, IMqttClientMock> { { wkid, mqttClient } };
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             pos = new PosProxyMock(true, null);
             ng = new NGProxyMock(false);
             broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.SetAVRFlash();
 
             Task.Run(async () =>
             {
@@ -203,7 +208,9 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             //pos camera device
             string direction = "ENTRY";
-            string workstationId = PosProxy.Workstations.SetAVRFlash(direction);
+            string workstationId = "AVR079";
+            PosProxy.WorkstationsProxy.ClearAVRFlash();
+            PosProxy.WorkstationsProxy.AddAVRFlash(workstationId, direction);
 
             FPAInitializer.Initialize();
 
@@ -478,12 +485,14 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             //test events are properly consumed for camera on the EXIT line
             //only one flash camera must be in devices for this test to work
 
+            FPAInitializer.Initialize();
+
 
             //pos camera device
             string direction = "EXIT";
-            string workstationId = PosProxy.Workstations.SetAVRFlash(direction);
-
-            FPAInitializer.Initialize();
+            string workstationId = "AVR079";
+            PosProxy.WorkstationsProxy.ClearAVRFlash();
+            PosProxy.WorkstationsProxy.AddAVRFlash(workstationId, direction);
 
 
             //A. checkout ok

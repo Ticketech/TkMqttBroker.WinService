@@ -103,16 +103,29 @@ namespace TkMqttBroker.WinService.Test.Proxies
 
 
 
-        public static class Workstations
+        public static class WorkstationsProxy
         {
-            public static string SetAVRFlash(string direction = "ENTRY", string ip = "127.0.0.1")
+            //eliminate avrflash devices, change to avr
+            public static void ClearAVRFlash()
             {
-                string workstationId = "AVR079";
+                DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
+update locationsmachinesconfigurations
+set MachineConfigurationValue = replace(MachineConfigurationValue,'avrflash', 'AVR')
+");
+            }
 
+
+            public static void Delete(string workstationId)
+            {
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 delete from LocationsMachinesConfigurations 
 where MachineName = '{workstationId}'
 ");
+            }
+
+            public static string AddAVRFlash(string workstationId = "AVR079", string direction = "ENTRY", string ip = "127.0.0.1")
+            {
+                Delete(workstationId);
 
                 DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
 insert into LocationsMachinesConfigurations
