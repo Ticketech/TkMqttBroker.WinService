@@ -2,11 +2,14 @@
 using MQTTnet;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tk.ConfigurationManager;
+using Tk.NetTiers;
+using Tk.NetTiers.DataAccessLayer;
 using Tk.Services.REST.Models.Stays;
 using Tk.Utilities.Log4Net;
 using TkMqttBroker.WinService.Brokers.FlashPosAvr;
@@ -30,21 +33,81 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         [TestMethod]
+        public void TestInOut()
+        {
+            //test two cameras, one in, one out
+
+            FPAInitializer.Initialize();
+
+
+            //A. all ok
+            var inMock = new MqttClientMock();
+            var outMock = new MqttClientMock();
+
+            var pos = new FPAPosProxy();
+            var ng = new FPANGProxy();
+
+            string inWkid = "AVR079";
+            string outWkid = "AVR073";
+
+            var broker = new FPABroker(new Dictionary<string, IMqttClientMock>
+                {
+                    { inWkid, inMock },
+                    { outWkid, outMock }
+                }, pos, ng);
+
+            PosProxy.SyncQueue.Clear();
+
+
+            //A. monthly in/out
+            MPS tag = PosProxy.MPSProxy.NewTag();
+            PosProxy.MPSProxy.AddTagToPOS(tag);
+
+            Task.Run(async () =>
+            {
+                await broker.Start();
+
+                FVRPayload payloadIn = MapPayload(tag);
+                await inMock.PublishDetection(payloadIn);
+
+                Thread.Sleep(10000);
+
+                FVRPayload payloadOut = MapPayload(tag);
+                await outMock.PublishDetection(payloadOut);
+
+                Thread.Sleep(210000);
+
+                await broker.Stop();
+            }).Wait();
+
+            Stays stay = PosProxy.StaysProxy.GetLatest();
+            Assert.IsNotNull(stay.StayDateOut);
+            Assert.AreEqual(stay.StayType, 1);
+
+            Vehicles vehicle = DataRepository.VehiclesProvider.GetByVehicleGUID(stay.VehicleGUID);
+            Assert.AreEqual(tag.Plate, vehicle.VehiclePlate);
+        }
+
+
+
+        [TestMethod]
         public void TestPosSync()
         {
             //tests broker does pos sync correctly
 
             FPAInitializer.Initialize();
 
+            string wkid = PosProxy.Workstations.SetAVRFlash();
+
 
             //A. all ok
             var mqttClient = new MqttClientMock();
+            var mqttMocks = new Dictionary<string, IMqttClientMock> { { wkid, mqttClient } };
             var pos = new PosProxyMock(true, null);
             var ng = new NGProxyMock(true);
-            var broker = new FPABroker(mqttClient, pos, ng);
+            var broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.SetAVRFlash();
 
             Task.Run(async () =>
             {
@@ -66,12 +129,12 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             //A. pos fails
             mqttClient = new MqttClientMock();
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { wkid, mqttClient } };
             pos = new PosProxyMock(false, null);
             ng = new NGProxyMock(true);
-            broker = new FPABroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
-            PosProxy.Workstations.SetAVRFlash();
 
             Task.Run(async () =>
             {
@@ -95,9 +158,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
             //A. ng fails, then ok
             mqttClient = new MqttClientMock();
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { wkid, mqttClient } };
             pos = new PosProxyMock(true, null);
             ng = new NGProxyMock(false);
-            broker = new FPABroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
             PosProxy.Workstations.SetAVRFlash();
@@ -176,9 +240,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             };
 
             var mqttClient = new MqttClientMock();
+            var mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             var pos = new PosProxyMock(true, posResponse);
             var ng = new NGProxyMock(true);
-            var broker = new FPABroker(mqttClient, pos, ng);
+            var broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -248,9 +313,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             };
 
             mqttClient = new MqttClientMock();
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             pos = new PosProxyMock(true, posResponse);
             ng = new NGProxyMock(true);
-            broker = new FPABroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -314,9 +380,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             };
 
             mqttClient = new MqttClientMock();
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             pos = new PosProxyMock(true, posResponse);
             ng = new NGProxyMock(true);
-            broker = new FPABroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -371,9 +438,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             };
 
             mqttClient = new MqttClientMock();
+            mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             pos = new PosProxyMock(false, posResponse);
             ng = new NGProxyMock(true);
-            broker = new FPABroker(mqttClient, pos, ng);
+            broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -452,9 +520,10 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             };
 
             var mqttClient = new MqttClientMock();
+            var mqttMocks = new Dictionary<string, IMqttClientMock> { { workstationId, mqttClient } };
             var pos = new PosProxyMock(true, posResponse);
             var ng = new NGProxyMock(true);
-            var broker = new FPABroker(mqttClient, pos, ng);
+            var broker = new FPABroker(mqttMocks, pos, ng);
 
             PosProxy.SyncQueue.Clear();
 
@@ -490,6 +559,38 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         // PRIVATE ///////////////////////////////////////////
+
+        private FVRPayload MapPayload(MPS tag)
+        {
+            return new FVRPayload
+            {
+                deviceMxId = "abc-1234",
+                eventId = Guid.NewGuid().ToString(),
+                mainImagePath = "g://abc/main.jpg",
+                lpCropPath = "g://abc/crop.jpg",
+                lpCropPaths = new List<string> { { "g://abc/evidence__IR__LPC.jpg" } },
+                eventDate = DateTime.Now,
+
+                eventData = new FVREventData
+                {
+                    laneId = "1",
+                    color = tag.Color,
+                    colorConfidence = 99,
+                    encounterId = Guid.NewGuid().ToString(),
+                    licensePlate = tag.Plate,
+                    licensePlateConfidence  = 99,
+                    make = tag.Make,
+                    makeConfidence = 99,
+                    model = "CAR",
+                    modelConfidence = 99,
+                    state = "new york",
+                    stateConfidence = 99,
+                    type = "CAR",
+                    typeConfidence = 99,
+                }
+            };
+        }
+
 
         public static int PosConfidence(double fvrConfidence)
         {

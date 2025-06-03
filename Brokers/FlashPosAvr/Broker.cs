@@ -15,7 +15,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         private static SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 
-        private readonly IMqttClient _mqttClient;
+        private readonly Dictionary<string,IMqttClientMock> _mqttMocks; //key = workstationid; eg, AVR079
         private readonly FPARepository _repo;
         private readonly INGProxy _ng;
         private readonly IPosProxy _pos;
@@ -29,7 +29,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public FPABroker()
         {
-            _mqttClient = null;
+            _mqttMocks = null;
 
             _repo = new FPARepository();
             _mapper = new FPAMapper();
@@ -40,9 +40,9 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
 
         //for testing
-        public FPABroker(IMqttClientMock mqttMock, IPosProxy posMock, INGProxy ngMock)
+        public FPABroker(Dictionary<string,IMqttClientMock> mqttMocks, IPosProxy posMock, INGProxy ngMock)
         {
-            _mqttClient = mqttMock;
+            _mqttMocks = mqttMocks;
 
             _repo = new FPARepository();
             _mapper = new FPAMapper();
@@ -61,10 +61,10 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 cameraConfig.Port = _configuration.CameraPort;
 
                 FPAProducer producer;
-                if (_mqttClient == null)
+                if (_mqttMocks == null)
                     producer = new FPAProducer(cameraConfig);
                 else
-                    producer = new FPAProducer(cameraConfig, _mqttClient as IMqttClientMock, _pos);
+                    producer = new FPAProducer(cameraConfig, _mqttMocks[cameraConfig.WorkstationId], _pos);
 
                 _producers.Add(producer);
 

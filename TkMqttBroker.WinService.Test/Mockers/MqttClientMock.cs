@@ -85,16 +85,19 @@ namespace TkMqttBroker.WinService.Test.Mockers
         public string LastAck { get; set; }
 
 
-        public async Task<FVRPayload> PublishDetection()
+        public async Task<FVRPayload> PublishDetection(FVRPayload payload = null)
         {
-            var payload = new FVRPayload
+            if (payload == null)
             {
-                eventType = "testo",
-                eventData = new FVREventData
+                payload = new FVRPayload
                 {
-                    encounterId = Guid.NewGuid().ToString(),
-                },
-            };
+                    eventType = "testo",
+                    eventData = new FVREventData
+                    {
+                        encounterId = Guid.NewGuid().ToString(),
+                    },
+                };
+            }
 
             var data = new MqttApplicationMessageBuilder()
              .WithTopic("detection")

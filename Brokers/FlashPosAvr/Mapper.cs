@@ -24,7 +24,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public CheckInRequest CheckInRequest(FVRPayload payload, FPACameraConfiguration workstation)
+        public CheckInRequest CheckInRequest(FVRPayload payload, FPACameraConfiguration cameraConfig)
         {
             var map = new CheckInRequest
             {
@@ -32,11 +32,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 {
                     camera_id = payload.deviceMxId,
                     confidence = PosConfidence(payload.eventData.licensePlateConfidence),
-                    direction = workstation.Direction.ToString(),
+                    direction = cameraConfig.Direction.ToString(),
                     location_id = TkConfigurationManager.CurrentLocationId,
-                    plate = $"{payload.eventData.licensePlate} : {workstation.Direction} : Duration : 0hr 0m 0s",
-                    workstation_id = workstation.WorkstationId,
-                    workstation_name = workstation.WorkstationId,
+                    plate = $"{payload.eventData.licensePlate} : {cameraConfig.Direction} : Duration : 0hr 0m 0s",
+                    workstation_id = cameraConfig.WorkstationId,
+                    workstation_name = cameraConfig.WorkstationId,
                     id = payload.eventId,
                     lane_id = PosLaneId(payload.eventData.laneId), //must be a number!
                     make = CheckInRequestMake(payload.eventData),
