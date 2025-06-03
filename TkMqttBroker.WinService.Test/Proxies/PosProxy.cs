@@ -106,6 +106,12 @@ namespace TkMqttBroker.WinService.Test.Proxies
                 int count = 0;
                 return DataRepository.StaysProvider.GetPaged("stayvoided = 0", "staydatein desc", 0, 1, out count).FirstOrDefault();
             }
+
+            public static void VoidOpen()
+            {
+                DataRepository.Provider.ExecuteNonQuery(CommandType.Text, $@"
+update stays set staydateout = getdate(), stayvoided = 1 where staydateout is null");
+            }
         }
 
 

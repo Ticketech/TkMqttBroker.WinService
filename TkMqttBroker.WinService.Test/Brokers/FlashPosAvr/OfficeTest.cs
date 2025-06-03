@@ -46,8 +46,17 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             //string direction = "ENTRY";
             //string workstationId = PosProxy.Workstations.SetAVRFlash(direction, cameraIP);
 
-            
+
+            string inWkid = "AVR079";
+            string outWkid = "AVR073";
+            string cameraIP = "10.30.50.106";
+            PosProxy.WorkstationsProxy.ClearAVRFlash();
+            PosProxy.WorkstationsProxy.AddAVRFlash(inWkid, "ENTRY", cameraIP);
+            PosProxy.WorkstationsProxy.AddAVRFlash(outWkid, "EXIT", cameraIP);
+
+
             PosProxy.SyncQueue.Clear();
+            PosProxy.StaysProxy.VoidOpen();
 
             var broker = new FPABroker();
 

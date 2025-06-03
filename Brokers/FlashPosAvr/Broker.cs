@@ -39,7 +39,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        //for testing
+        //for testing. one mqtt client per workstation id to simulate diff cameras
         public FPABroker(Dictionary<string,IMqttClientMock> mqttMocks, IPosProxy posMock, INGProxy ngMock)
         {
             _mqttMocks = mqttMocks;

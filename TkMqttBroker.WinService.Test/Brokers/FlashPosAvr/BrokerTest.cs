@@ -33,11 +33,9 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         [TestMethod]
-        public void TestInOut()
+        public void TestMonthlyInOut()
         {
-            //test two cameras, one in, one out
-
-            FPAInitializer.Initialize();
+            //test two cameras, one in, one out for a monthly
 
 
             //A. all ok
@@ -53,6 +51,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
             PosProxy.WorkstationsProxy.AddAVRFlash(inWkid, "ENTRY");
             PosProxy.WorkstationsProxy.AddAVRFlash(outWkid, "EXIT");
 
+            FPAInitializer.Initialize();
 
             var broker = new FPABroker(new Dictionary<string, IMqttClientMock>
                 {
