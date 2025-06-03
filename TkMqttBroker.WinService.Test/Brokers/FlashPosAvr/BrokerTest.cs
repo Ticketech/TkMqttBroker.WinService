@@ -79,7 +79,7 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
                 FVRPayload payloadOut = MapPayload(tag);
                 await outMock.PublishDetection(payloadOut);
 
-                Thread.Sleep(210000);
+                Thread.Sleep(10000);
 
                 await broker.Stop();
             }).Wait();

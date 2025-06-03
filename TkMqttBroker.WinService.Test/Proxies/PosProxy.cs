@@ -84,7 +84,14 @@ namespace TkMqttBroker.WinService.Test.Proxies
             {
                 DataRepository.MPSProvider.Insert(mps);
 
-                DataRepository.Provider.ExecuteNonQuery(CommandType.Text, "drop table TmpMDBMPS");
+                try
+                {
+                    DataRepository.Provider.ExecuteNonQuery(CommandType.Text, "drop table TmpMDBMPS");
+                }
+                catch { }
+
+                bool? processOK = true;
+                DataRepository.ReplicationsProvider.ImportAPiMPS(TkConfigurationManager.CurrentLocationGUID, ref processOK);
 
                 return mps;
             }
@@ -97,7 +104,7 @@ namespace TkMqttBroker.WinService.Test.Proxies
             public static Stays GetLatest()
             {
                 int count = 0;
-                return DataRepository.StaysProvider.GetPaged(null, "staydatein desc and stayvoided = 0", 0, 1, out count).FirstOrDefault();
+                return DataRepository.StaysProvider.GetPaged("stayvoided = 0", "staydatein desc", 0, 1, out count).FirstOrDefault();
             }
         }
 
