@@ -42,6 +42,7 @@ c. currentLocationGUID and currentWorkStationId as always
 1. Pos Policies
     - Ticketech NG Servicel Url
     - Ticketech NG Core Api
+    - AVR Provider
 
 
 1. Pos Devices
@@ -57,8 +58,8 @@ c. currentLocationGUID and currentWorkStationId as always
 -------------------------------------------------------------------------
 A. INSTALLING / RUNNING / QUERYING / STOPPING / DELETING
 
-- Copy files into service folder (c:\pos\Services\FlashAvr)
-- sc create TkFlashAvr binPath="c:\pos\Services\FlashAvr\TkFlashAvr.WinService.exe"
+- Copy files into service folder (c:\pos\WinServices\FlashAvr)
+- sc create TkFlashAvr binPath="c:\pos\WinServices\FlashAvr\TkFlashAvr.WinService.exe"
 - sc start tkbroker
 - sc query tkbroker
 - sc stop tkbroker
