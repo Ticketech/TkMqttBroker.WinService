@@ -11,7 +11,7 @@ using TkMqttBroker.WinService.Brokers.FlashPosAvr;
 
 namespace TkMqttBroker.WinService
 {
-    //gmz.next. created.
+    //gmz.1.0.0. created.
     static class Program
     {
         public static log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

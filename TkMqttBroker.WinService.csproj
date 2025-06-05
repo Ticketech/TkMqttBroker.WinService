@@ -207,7 +207,7 @@
     <None Include="TkMqttBroker.WinService_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Brokers\FlashPosAvr\Readme.txt">
+    <Content Include="Readme.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="VersionHistory.txt">

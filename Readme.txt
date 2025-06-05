@@ -1,5 +1,5 @@
 ﻿==============================================================================
-FLASH POS AVR BROKER - gmz.next. (May 2025)
+FLASH POS AVR BROKER - gmz.1.0.0. (May 2025)
 ==============================================================================
 
 
@@ -60,10 +60,10 @@ A. INSTALLING / RUNNING / QUERYING / STOPPING / DELETING
 
 - Copy files into service folder (c:\pos\WinServices\FlashAvr)
 - sc create TkFlashAvr binPath="c:\pos\WinServices\FlashAvr\TkFlashAvr.WinService.exe"
-- sc start tkbroker
-- sc query tkbroker
-- sc stop tkbroker
-- sc delete tkbroker
+- sc start TkFlashAvr
+- sc query TkFlashAvr
+- sc stop TkFlashAvr
+- sc delete TkFlashAvr
 
 - Must have admin permits to run commands
 - Service User must have access to folder

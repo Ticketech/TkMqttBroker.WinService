@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 {
-    //gmz.next. created.
+    //gmz.1.0.0. created.
     public partial class FPAService : ServiceBase
     {
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
