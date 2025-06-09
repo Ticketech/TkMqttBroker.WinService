@@ -164,6 +164,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     colour = source.infoplate.colour,
                     db_match = source.infoplate.db_match,
                     event_timestamp = source.infoplate.event_timestamp.ToString(),
+
+                    source = source.infoplate.source,
                 }
             };
         }

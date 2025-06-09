@@ -204,7 +204,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>FlashPosAvr.Designer.cs</LastGenOutput>
     </None>
-    <None Include="TkMqttBroker.WinService_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Readme.txt">
