@@ -94,9 +94,9 @@ namespace TkMqttBroker.WinService.Test.Brokers.FlashPosAvr
 
 
         [TestMethod]
-        public void TestPosSync()
+        public void TestNGSync()
         {
-            //tests broker does pos sync correctly
+            //tests broker does ng sync correctly
 
             FPAInitializer.Initialize();
 
