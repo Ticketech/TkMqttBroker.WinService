@@ -30,11 +30,11 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     public interface INGProxy
     {
-        Task<bool> Send(NGPostAvrEntryRawRequest data);
+        Task<bool> Send(NGPostAvrEntryRequestBody data);
     }
 
     //mock mqtt client
-    public interface IMqttClientMock: IMqttClient
+    public interface IMqttClientMock : IMqttClient
     {
         void UseApplicationMessageReceivedHandler_Mock(Func<MqttApplicationMessageReceivedEventArgs, Task> handler);
     }
@@ -56,6 +56,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public string PosApiKey;
         public string PosServiceUrl;
+
+        public string LocationId;
 
         public FPABrokerConfiguration Clone()
         {
@@ -128,42 +130,46 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
     #region NG
 
-    public class NGPostAvrEntryRawRequest
-    {
-        public NGInfoplate infoplate;
-    }
 
-
-    public class NGInfoplate
+    public class NGPostAvrEntryRequestBody
     {
-        public string Id;
-        public string gcamera_id;
-        public int lane_id;
-        public string plate;
-        public string reading;
+        public string garage_identifier;
+        public string external_id;
+        public string external_camera_id;
+        public string license_plate; //plate : direction
+        public string reading; //plate
+        public string region; //us-ny
+        public int region_confidence;
         public string make;
         public string colour;
-        public string direction;
+        public string direction; //Entry,Exit
         public int confidence;
         public string full_image;
         public string cropped_image;
-        public bool alert;
         public string evidence_image;
-        public int latitude;
-        public int longitude;
-        public string vehicle_category;
-        public string headgear;
-        public bool db_match;
-        public string event_timestamp;
+        public string vehicle_category; //CAR
+        public long event_timestamp_epoch_ms;
         public string workstation_name;
-        public string workstation_id;
-        public string location_id;
-
+        public string external_workstation_id;
+        public string external_location_id;
+        public string stay_identifier;
+        public string source; //flashfvr
         public string unsigned_gcp_full;
         public string unsigned_gcp_cropped;
         public string unsigned_gcp_evidence;
+        public DateTime unsigned_gcp_signed_timestamp;
+    }
 
-        public string source;
+
+
+    public class NGPageResultGarageGet
+    {
+        public NGGarageGet[] data;
+    }
+
+    public class NGGarageGet
+    {
+        public string identifier;
     }
 
     #endregion

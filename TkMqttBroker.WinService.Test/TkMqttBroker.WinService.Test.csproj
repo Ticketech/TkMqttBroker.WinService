@@ -140,6 +140,8 @@
   <ItemGroup>
     <Compile Include="Brokers\FlashPosAvr\OfficeTest.cs" />
     <Compile Include="Brokers\FlashPosAvr\BrokerTest.cs" />
+    <Compile Include="Brokers\FlashPosAvr\NGProxyTest.cs" />
+    <Compile Include="Brokers\FlashPosAvr\MapperTest.cs" />
     <Compile Include="Mockers\FPAProducerMock.cs" />
     <Compile Include="Mockers\MqttClientMock.cs" />
     <Compile Include="Mockers\NGProxyMock.cs" />

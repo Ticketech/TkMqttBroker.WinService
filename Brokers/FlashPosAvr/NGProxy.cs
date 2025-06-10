@@ -17,7 +17,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         static readonly log4net.ITktLog logger = log4net.TktLogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly FPABrokerConfiguration _config;
-
+        private string _garageIdentifier;
 
         public FPANGProxy ()
         {
@@ -25,7 +25,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public async Task<bool> Send(NGPostAvrEntryRawRequest data)
+        public async Task<bool> Send(NGPostAvrEntryRequestBody data)
         {
             bool res = false;
 
@@ -33,10 +33,13 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 using (var client = GetClient())
                 {
-                    string ApiCall = _config.NGServiceUrl + $"/api/core/avr/entry/raw";
-                    string payload = JsonConvert.SerializeObject(data);
-                    var request = new StringContent(payload, Encoding.UTF8, "application/json");
+                    string ApiCall = _config.NGServiceUrl + $"/api/core/avr/entry";
 
+                    data.garage_identifier = await GarageIdentifier();
+                    string payload = JsonConvert.SerializeObject(data);
+                    
+                    var request = new StringContent(payload, Encoding.UTF8, "application/json");
+                    
                     logger.Info("Request NG raw avr", "Send Raw Avr", $"POST,Url:{ApiCall},Payload:{payload}");
 
                     var response = await client.PostAsync(ApiCall, request);
@@ -60,6 +63,47 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             }
 
             return res;
+        }
+
+        public async Task<string> GarageIdentifier()
+        {
+            if (_garageIdentifier == null)
+            {
+                try
+                {
+                    using (var client = GetClient())
+                    {
+                        string ApiCall = _config.NGServiceUrl + $"/api/core/garage?tt_location_id={_config.LocationId}";
+
+                        logger.Info("Request Get Garage", "Get Garage", $"GET,Url:{ApiCall}");
+
+                        var response = await client.GetAsync(ApiCall);
+
+                        var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
+
+                        logger.Info("Response Get Garage", "Get Garage", $"Url:{ApiCall},Response:{responseStr}");
+
+                        if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
+                            throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
+
+                        if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
+                            throw new Exception($"Processing error. Code:{response.StatusCode}.Message:{responseStr}.");
+
+                        NGPageResultGarageGet result = JsonConvert.DeserializeObject<NGPageResultGarageGet>(responseStr);
+
+                        if ((result.data?.Length ?? 0) == 0)
+                            throw new Exception($"No data was returned");
+
+                        _garageIdentifier = result.data[0].identifier;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error("Error getting garage", "Get Garage", $"Param:{_config.LocationId},Error:{ex}");
+                }
+            }
+
+            return _garageIdentifier;
         }
 
 

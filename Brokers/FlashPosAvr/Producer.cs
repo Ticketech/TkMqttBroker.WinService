@@ -232,7 +232,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 {
                     var payload = JsonConvert.DeserializeObject<FVRPayload>(strPayload);
 
-                    CheckInRequest avrData = _mapper.CheckInRequest(payload, _cameraConfiguration);
+                    var avrData = _mapper.CheckInRequest(payload, _cameraConfiguration);
 
                     //save data to sync ng
                     await _repo.Add(avrData);

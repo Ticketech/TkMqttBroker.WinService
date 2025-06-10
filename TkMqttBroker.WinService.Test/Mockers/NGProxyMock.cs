@@ -18,7 +18,7 @@ namespace TkMqttBroker.WinService.Test.Mockers
         }
 
 
-        public async Task<bool> Send(NGPostAvrEntryRawRequest data)
+        public async Task<bool> Send(NGPostAvrEntryRequestBody data)
         {
             await Task.Run(async () =>
             {

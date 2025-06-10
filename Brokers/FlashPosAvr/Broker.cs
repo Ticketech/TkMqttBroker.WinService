@@ -133,7 +133,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     try
                     {
                         avrData = JsonConvert.DeserializeObject<CheckInRequest>(sync.SynqData);
-                        bool res = await _ng.Send(_mapper.NGPostAvrEntryRawRequest(avrData));
+                        var ngrequest = _mapper.NGPostAvrEntryRawRequest(avrData);
+                        bool res = await _ng.Send(ngrequest);
 
                         //todo: if it fails? 
                         if (res)

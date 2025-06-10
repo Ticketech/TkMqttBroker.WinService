@@ -25,6 +25,42 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
+        public NGPostAvrEntryRequestBody NGPostAvrEntryRawRequest(FVRPayload payload, FPACameraConfiguration cameraConfig)
+        {
+            var map = new NGPostAvrEntryRequestBody
+            {
+                external_camera_id = payload.deviceMxId,
+                confidence = PosConfidence(payload.eventData.licensePlateConfidence),
+                direction = NGAvrDirection(cameraConfig.Direction.ToString()),
+                external_location_id = _config.LocationId,
+                reading = payload.eventData.licensePlate,
+                license_plate = $"{payload.eventData.licensePlate} : {NGAvrDirection(cameraConfig.Direction.ToString())}",
+                external_workstation_id = cameraConfig.WorkstationId,
+                workstation_name = cameraConfig.WorkstationId,
+                external_id = payload.eventId,
+                make = CheckInRequestMake(payload.eventData),
+                unsigned_gcp_full = payload.mainImagePath,
+                unsigned_gcp_cropped = payload.lpCropPath,
+                unsigned_gcp_evidence = CheckInRequestEvidenceImage(payload),
+                vehicle_category = payload.eventData.type,
+                colour = CheckInRequestColor(payload.eventData),
+                event_timestamp_epoch_ms = EpochMiliseconds(payload.eventDate),
+                unsigned_gcp_signed_timestamp = payload.eventDate.ToUniversalTime(),
+                source = ValueMappingSourceEnum.FlashFVR.ToString().ToLower(),
+                garage_identifier = null, //completed by ng
+                stay_identifier = null,
+            };
+
+            //region
+            string region; int confidence;
+            Region(payload.eventData, out region, out confidence);
+            map.region = region;
+            map.region_confidence = confidence;
+
+            return map;
+       }
+
+
         public CheckInRequest CheckInRequest(FVRPayload payload, FPACameraConfiguration cameraConfig)
         {
             var map = new CheckInRequest
@@ -38,7 +74,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     plate = $"{payload.eventData.licensePlate} : {cameraConfig.Direction} : Duration : 0hr 0m 0s",
                     workstation_id = cameraConfig.WorkstationId,
                     workstation_name = cameraConfig.WorkstationId,
-                    id = payload.eventId,
+                    id = $"{payload.eventId}:{cameraConfig.WorkstationId}",
                     lane_id = PosLaneId(payload.eventData.laneId), //must be a number!
                     make = CheckInRequestMake(payload.eventData),
               
@@ -104,27 +140,37 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         }
 
 
-        public void CheckInRequestRegion(CheckInRequest target, FVREventData eventData)
+        public void Region(FVREventData eventData, out string region, out int confidence)
         {
             if (PosConfidence(eventData.stateConfidence) < _config.StateConfidenceMin)
             {
-                target.infoplate.region = $"us-{_config.DefaultStateCode}".ToLower();
-                target.infoplate.region_confidence = 100;
+                region = $"us-{_config.DefaultStateCode}".ToLower();
+                confidence = 100;
             }
             else
             {
                 string code = FPAPolicy.StateCode(eventData.state);
                 if (code == null)
                 {
-                    target.infoplate.region = $"us-{_config.DefaultStateCode}".ToLower();
-                    target.infoplate.region_confidence = 100;
+                    region = $"us-{_config.DefaultStateCode}".ToLower();
+                    confidence = 100;
                 }
                 else
                 {
-                    target.infoplate.region = $"us-{FPAPolicy.StateCode(eventData.state)}".ToLower();
-                    target.infoplate.region_confidence = PosConfidence(eventData.stateConfidence);
+                    region = $"us-{FPAPolicy.StateCode(eventData.state)}".ToLower();
+                    confidence = PosConfidence(eventData.stateConfidence);
                 }
             }
+        }
+
+
+        public void CheckInRequestRegion(CheckInRequest target, FVREventData eventData)
+        {
+            string region; int confidence;
+            Region(eventData, out region, out confidence);
+
+            target.infoplate.region = region;
+            target.infoplate.region_confidence = confidence;
         }
 
 
@@ -136,39 +182,63 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             return (long)t.TotalMilliseconds;
         }
 
-        public NGPostAvrEntryRawRequest NGPostAvrEntryRawRequest(CheckInRequest source)
+
+
+        public DateTime UTCFromEpochMiliseconds(long milisenconds)
         {
-            return new NGPostAvrEntryRawRequest
+            return (new DateTime(1970, 1, 1)).AddMilliseconds(milisenconds);
+        }
+
+
+        public NGPostAvrEntryRequestBody NGPostAvrEntryRawRequest(CheckInRequest source)
+        {
+            return new NGPostAvrEntryRequestBody
             {
-                infoplate = new NGInfoplate
-                {
-                    gcamera_id = source.infoplate.camera_id,
-                    confidence = source.infoplate.confidence,
-                    direction = source.infoplate.direction,
-                    location_id = source.infoplate.location_id,
-                    plate = source.infoplate.plate,
-                    workstation_id = source.infoplate.workstation_id,
-                    workstation_name = source.infoplate.workstation_name,
-                    Id = source.infoplate.id,
-                    lane_id = source.infoplate.lane_id,
-                    make = source.infoplate.make,
-
-                    unsigned_gcp_full = source.infoplate.full_image,
-                    unsigned_gcp_cropped = source.infoplate.cropped_image,
-                    alert = source.infoplate.alert,
-                    unsigned_gcp_evidence = source.infoplate.evidence_image,
-                    latitude = source.infoplate.latitude,
-                    longitude = source.infoplate.longitude,
-                    vehicle_category = NGVehicleCategory(source.infoplate.vehicle_category),
-                    headgear = source.infoplate.headgear,
-                    colour = source.infoplate.colour,
-                    db_match = source.infoplate.db_match,
-                    event_timestamp = source.infoplate.event_timestamp.ToString(),
-
-                    source = source.infoplate.source,
-                }
+                external_camera_id = source.infoplate.camera_id,
+                confidence = source.infoplate.confidence,
+                direction = NGAvrDirection(source.infoplate.direction),
+                external_location_id = source.infoplate.location_id,
+                reading = NGReading(source),
+                license_plate = NGLicensePlate(source),
+                external_workstation_id = source.infoplate.workstation_id,
+                workstation_name = source.infoplate.workstation_name,
+                external_id = source.infoplate.id,
+                make = source.infoplate.make,
+                unsigned_gcp_full = source.infoplate.full_image,
+                unsigned_gcp_cropped = source.infoplate.cropped_image,
+                unsigned_gcp_evidence = source.infoplate.evidence_image,
+                vehicle_category = NGVehicleCategory(source.infoplate.vehicle_category),
+                colour = source.infoplate.colour,
+                event_timestamp_epoch_ms = source.infoplate.event_timestamp,
+                unsigned_gcp_signed_timestamp = UTCFromEpochMiliseconds(source.infoplate.event_timestamp),
+                source = source.infoplate.source,
+                garage_identifier = null, //completed by ng
+                region = source.infoplate.region,
+                region_confidence = source.infoplate.region_confidence,
+                stay_identifier = null,
             };
         }
+
+
+        public string NGReading(CheckInRequest source)
+        {
+            return source.infoplate.plate.Split(':')[0].Trim();
+        }
+
+        public string NGLicensePlate(CheckInRequest source)
+        {
+            return $"{NGReading(source)} : {NGAvrDirection(source.infoplate.direction)}";
+        }
+
+
+        public string NGAvrDirection(string direction)
+        {
+            if (direction.Contains("entry"))
+                return "Entry";
+            else
+                return "Exit";
+        }
+
 
         public string NGVehicleCategory(string vehicle_category)
         {

@@ -123,6 +123,8 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             policy.NGServiceUrl = pospolicy.TicketechNG.NGService.ServiceUrl.Value;
             policy.NGApiKey = ConfigurationDecrypter.DecryptValueWithHeader(pospolicy.TicketechNG.CoreApiKey.Value);
 
+            policy.LocationId = TkConfigurationManager.CurrentLocationId;
+
             return policy;
         }
 
