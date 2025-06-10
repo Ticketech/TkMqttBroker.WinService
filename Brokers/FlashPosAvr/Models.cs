@@ -157,7 +157,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
         public string unsigned_gcp_full;
         public string unsigned_gcp_cropped;
         public string unsigned_gcp_evidence;
-        public DateTime unsigned_gcp_signed_timestamp;
+        public DateTime? unsigned_gcp_signed_timestamp;
     }
 
 

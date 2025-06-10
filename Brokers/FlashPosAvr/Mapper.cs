@@ -74,7 +74,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                     plate = $"{payload.eventData.licensePlate} : {cameraConfig.Direction} : Duration : 0hr 0m 0s",
                     workstation_id = cameraConfig.WorkstationId,
                     workstation_name = cameraConfig.WorkstationId,
-                    id = $"{payload.eventId}:{cameraConfig.WorkstationId}",
+                    id = payload.eventId, // $"{payload.eventId}:{cameraConfig.WorkstationId}",
                     lane_id = PosLaneId(payload.eventData.laneId), //must be a number!
                     make = CheckInRequestMake(payload.eventData),
               
@@ -210,7 +210,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
                 vehicle_category = NGVehicleCategory(source.infoplate.vehicle_category),
                 colour = source.infoplate.colour,
                 event_timestamp_epoch_ms = source.infoplate.event_timestamp,
-                unsigned_gcp_signed_timestamp = UTCFromEpochMiliseconds(source.infoplate.event_timestamp),
+                unsigned_gcp_signed_timestamp = null, //must be signed. UTCFromEpochMiliseconds(source.infoplate.event_timestamp),
                 source = source.infoplate.source,
                 garage_identifier = null, //completed by ng
                 region = source.infoplate.region,
