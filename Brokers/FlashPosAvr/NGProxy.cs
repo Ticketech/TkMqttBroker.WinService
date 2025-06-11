@@ -46,7 +46,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                     var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
 
-                    logger.Info("Response NG raw avr", "Send Raw Avr", $"Url:{ApiCall},Response:{responseStr}");
+                    logger.Info("Response NG raw avr", "Send Raw Avr", $"Url:{ApiCall},HttpStatus:{response.StatusCode},Response:{responseStr}");
 
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
@@ -81,7 +81,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                         var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
 
-                        logger.Info("Response Get Garage", "Get Garage", $"Url:{ApiCall},Response:{responseStr}");
+                        logger.Info("Response Get Garage", "Get Garage", $"Url:{ApiCall},Status:{response.StatusCode},Response:{responseStr}");
 
                         if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                             throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");

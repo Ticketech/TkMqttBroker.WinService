@@ -52,7 +52,7 @@ c. currentLocationGUID and currentWorkStationId as always
     - Eg., <posDevices> <device name="AVR" type="AVR" model="AVRFlash" required="false" location="10.30.50.106" spoolerPrefix="ENTRY" /></posDevices>
 
 1. Suite Services
-    - Add avr permits to list used to create the Core Api Key: write, read, edit , del:avr_entry
+    - Add avr permits to list used to create the Core Api Key: write:avr_entry,read:avr_entry,edit:avr_entry,del:avr_entry
 
 
 -------------------------------------------------------------------------

@@ -41,7 +41,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
                     var responseStr = (await response.Content.ReadAsStringAsync()).ToString();
 
-                    logger.Info("Response Pos CheckInOutAVR", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Response:{responseStr}");
+                    logger.Info("Response Pos CheckInOutAVR", "Call Pos CheckInOutAVR", $"Url:{ApiCall},Status:{response.StatusCode},Response:{responseStr}");
 
                     if ((int)response.StatusCode >= 500 && (int)response.StatusCode <= 599)
                         throw new Exception($"System Error. Status:{response.StatusCode},Message:{responseStr}.");
