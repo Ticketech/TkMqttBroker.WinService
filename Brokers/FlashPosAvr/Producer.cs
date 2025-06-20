@@ -270,7 +270,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             {
                 logger.Error("Disconnection detected. Will try to reconnect", "Camera Event", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
 
-                await Reconnect();
+                await ReconnectNonBlock();
             }
             catch(Exception ex)
             {
@@ -296,9 +296,20 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public async Task Reconnect()
         {
+            await _semaphoreSlim.WaitAsync();
+
+            await ReconnectNonBlock();
+
+            _semaphoreSlim.Release();
+        }
+
+
+        private async Task ReconnectNonBlock()
+        {
             try
             {
-                //await _semaphoreSlim.WaitAsync();
+                _isActive = false;
+
                 logger.Debug("Reconnecting", "Reconnect", $"WorkstationId:{_cameraConfiguration?.WorkstationId}");
 
                 _mqttClient.Dispose();
@@ -312,10 +323,6 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
             catch(Exception ex)
             {
                 logger.Error("Reconnection failed", "Reconnect", $"WorkstationId:{_cameraConfiguration?.WorkstationId},Message:{ex}");
-            }
-            finally
-            {
-                //_semaphoreSlim.Release();
             }
         }
     }

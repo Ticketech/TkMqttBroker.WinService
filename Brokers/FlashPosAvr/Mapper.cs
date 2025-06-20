@@ -133,7 +133,7 @@ namespace TkMqttBroker.WinService.Brokers.FlashPosAvr
 
         public string CheckInRequestColor(FVREventData eventData)
         {
-            if (PosConfidence(eventData.makeConfidence) < _config.ColorConfidenceMin)
+            if (PosConfidence(eventData.colorConfidence) < _config.ColorConfidenceMin)
                 return "OTHER";
             else
                 return eventData.color;
